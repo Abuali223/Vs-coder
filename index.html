@@ -234,10 +234,11 @@ const LETTERS = [
 ];
 function L(char, uz, ar){ return {char, uz, ar}; }
 
-/* So‘zlar to‘plamlari */
+/* So‘zlar to‘plamlari — kengaytirilgan */
 const WORD_SETS = {
   "Hayvonlar": [
-    W("أَسَد","Sher"), W("قِطَّة","Mushuk"), W("كَلْب","It"), W("حِصَان","Ot"), W("طَائِر","Qush"), W("سَمَك","Baliq")
+    W("أَسَد","Sher"), W("قِطَّة","Mushuk"), W("كَلْب","It"), W("حِصَان","Ot"), 
+    W("طَائِر","Qush"), W("سَمَك","Baliq")
   ],
   "Mevalar": [
     W("تُفَّاح","Olma"), W("مَوْز","Banan"), W("عِنَب","Uzum"), W("بُرْتُقَال","Apelsin"),
@@ -245,10 +246,18 @@ const WORD_SETS = {
   ],
   "Ranglar": [
     W("أَحْمَر","Qizil"), W("أَزْرَق","Ko‘k"), W("أَخْضَر","Yashil"), W("أَصْفَر","Sariq"),
-    W("أَسْوَد","Qora"), W("أَبْيَض","Oq")
+    W("أَسْوَد","Qora"), W("أَبْيَض","Oq"), W("بُنِّيّ","Jigarrang"),
+    W("بَنَفْسَجِيّ","Siyohrang"), W("بُرْتُقَالِيّ","To‘q sariq"), W("وَرْدِيّ","Pushti")
   ],
-  "Oila": [
-    W("أَب","Ota"), W("أُمّ","Ona"), W("أَخ","Aka/uka"), W("أُخْت","Opa/singil"), W("جَدّ","Bobo"), W("جَدَّة","Buvi")
+  "Qarindoshlar": [
+    W("أَب","Ota"), W("أُمّ","Ona"), W("أَخ","Aka/uka"), W("أُخْت","Opa/singil"), 
+    W("جَدّ","Bobo"), W("جَدَّة","Buvi"), W("عَمّ","Amaki"), W("عَمَّة","Amma"),
+    W("خَال","Tog‘a"), W("خَالَة","Xola")
+  ],
+  "Tana a’zolari": [
+    W("رَأْس","Bosh"), W("وَجْه","Yuz"), W("عَيْن","Ko‘z"), W("أُذُن","Quloq"),
+    W("فَم","Og‘iz"), W("أَنْف","Burun"), W("يَد","Qo‘l"), W("رِجْل","Oyoq"),
+    W("قَلْب","Yurak"), W("شَعْر","Soch")
   ],
   "Sinfxona": [
     W("كِتَاب","Kitob"), W("قَلَم","Ruchka"), W("دَفْتَر","Daftar"), W("كُرْسِيّ","Stul"),
@@ -289,10 +298,12 @@ const quizTpl   = document.getElementById('quiz-tpl');
 
 let order = [];           // indexlar
 let currentIndex = 0;     // overlayda qaysi karta
-let currentCards = [];    // hozir gridda ko‘rsatilayotgan obyektlar ro‘yxati
+let currentCards = [];    // griddagi obyektlar ro‘yxati
 const slots = new WeakMap();
 const el = (t,c)=>{const n=document.createElement(t); if(c) n.className=c; return n;};
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+let animating = false; // bir vaqtning o'zida faqat bitta almashtirish
 
 /* ====== Boshlang‘ich holat ====== */
 initWordsUI();
@@ -305,15 +316,15 @@ catSel.addEventListener('change', ()=> render());
 btnShuffle.addEventListener('click', ()=>{ order = shuffle(order); render(false); });
 btnReset.addEventListener('click', ()=>{ order = [...Array(currentCards.length).keys()]; render(false); });
 
-btnPrev.addEventListener('click', prev);
-btnNext.addEventListener('click', next);
+btnPrev.addEventListener('click', ()=> swapDelta(-1));
+btnNext.addEventListener('click', ()=> swapDelta(+1));
 overlay.addEventListener('click', e=>{ if(e.target===overlay) closeLarge(); });
 ovClose.addEventListener('click', closeLarge);
 window.addEventListener('keydown', e=>{
   if(e.key==='Escape') closeLarge();
   if(!overlay.classList.contains('open')) return;
-  if(e.key==='ArrowLeft') prev();
-  if(e.key==='ArrowRight') next();
+  if(e.key==='ArrowLeft')  swapDelta(-1); // RTL: chap = oldingi
+  if(e.key==='ArrowRight') swapDelta(+1);
 });
 
 btnQuiz.addEventListener('click', startQuiz);
@@ -329,7 +340,6 @@ function setMode(mode){
     currentCards = LETTERS.map(x=>({type:'letter', ...x}));
   }else{
     catSel.style.display='inline-block'; catLabel.style.display='inline-block';
-    // tanlangan to‘plamni yuklaymiz
     const cat = catSel.value || Object.keys(WORD_SETS)[0];
     currentCards = WORD_SETS[cat].map(x=>({type:'word', ...x}));
   }
@@ -337,14 +347,13 @@ function setMode(mode){
   render(true);
 }
 function initWordsUI(){
-  // kategoriya select ni to‘ldirish
   catSel.innerHTML = '';
   Object.keys(WORD_SETS).forEach(k=>{
     const o=document.createElement('option'); o.value=k; o.textContent=k; catSel.appendChild(o);
   });
 }
 function render(resetOverlay=true){
-  if(resetOverlay) closeLarge();
+  if(resetOverlay) closeLarge(true);
   grid.innerHTML='';
   order.forEach((idx)=>{
     const d = currentCards[idx];
@@ -359,8 +368,8 @@ function render(resetOverlay=true){
 
     const back=el('div','face back');
     const info=el('div','info');
-    const big=el('p','big'); big.textContent = d.type==='letter' ? d.ar : d.ar;
-    const name=el('p','name'); name.textContent= d.type==='letter' ? d.uz : d.uz;
+    const big=el('p','big'); big.textContent = d.ar;
+    const name=el('p','name'); name.textContent= d.uz;
     if(d.type==='word'){
       const badge=el('span','badge'); badge.textContent='So‘z';
       info.appendChild(badge);
@@ -371,52 +380,114 @@ function render(resetOverlay=true){
     inner.appendChild(front); inner.appendChild(back);
     btn.appendChild(inner); card.appendChild(btn); grid.appendChild(card);
 
-    btn.addEventListener('click', ()=> openLarge(card, order.indexOf(idx)));
+    btn.addEventListener('click', ()=> openOrSwap(card, order.indexOf(idx)));
   });
 }
 function ariaLabel(d){
   return d.type==='letter' ? `Harf ${d.char}, ${d.uz}` : `So‘z ${d.ar}, ${d.uz}`;
 }
 
-/* ---- Katta karta ---- */
-function openLarge(card, i){
-  closeLarge();
-  currentIndex = i;
-  slots.set(card, {parent:card.parentNode, next:card.nextSibling});
-  overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
-  card.classList.add('is-open','is-large','pop-in');
-  overlay.appendChild(card);
-  document.body.style.overflow='hidden';
-}
-function closeLarge(){
-  if(!overlay.classList.contains('open')) return;
-  const card = overlay.querySelector('.card');
-  if(card){
-    card.classList.remove('pop-in'); card.classList.add('pop-out');
-    card.addEventListener('animationend', function handler(){
-      card.removeEventListener('animationend', handler);
-      card.classList.remove('is-open','is-large','pop-out');
-      const slot=slots.get(card);
-      if(slot && slot.parent){ slot.parent.insertBefore(card, slot.next||null); slots.delete(card); }
-      overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
-      document.body.style.overflow='';
-    });
+/* ---- Katta karta boshqaruvlari ---- */
+function openOrSwap(card, i){
+  if(animating) return;
+  if(overlay.classList.contains('open')){
+    // Overlay allaqachon ochiq: avvalgisini yopib, yangisini ochamiz
+    swapTo(i, card);
+  }else{
+    openLarge(card, i);
   }
 }
-function prev(){ jump(-1); }
-function next(){ jump(+1); }
-function jump(delta){
-  const card = overlay.querySelector('.card'); if(!card) return;
-  const slot=slots.get(card);
-  if(slot && slot.parent){ slot.parent.insertBefore(card, slot.next||null); slots.delete(card); }
-  currentIndex = (currentIndex + delta + order.length) % order.length;
-  const target = grid.children[currentIndex];
-  openLarge(target, currentIndex);
+function openLarge(card, i){
+  if(animating) return;
+  currentIndex = i;
+  const slot = {parent:card.parentNode, next:card.nextSibling};
+  slots.set(card, slot);
+
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden','false');
+
+  card.classList.add('is-open','is-large','pop-in');
+  overlay.appendChild(card);
+
+  document.body.style.overflow='hidden';
+}
+function closeLarge(immediate=false){
+  if(!overlay.classList.contains('open')) return;
+  const card = overlay.querySelector('.card');
+  if(!card) { overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; return; }
+
+  if(immediate){
+    card.classList.remove('is-open','is-large','pop-in','pop-out');
+    const slot=slots.get(card);
+    if(slot && slot.parent) slot.parent.insertBefore(card, slot.next||null);
+    overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow='';
+    slots.delete(card);
+    return;
+  }
+
+  if(animating) return;
+  animating = true;
+  card.classList.remove('pop-in'); card.classList.add('pop-out');
+  card.addEventListener('animationend', function handler(){
+    card.removeEventListener('animationend', handler);
+    card.classList.remove('is-open','is-large','pop-out');
+    const slot=slots.get(card);
+    if(slot && slot.parent){ slot.parent.insertBefore(card, slot.next||null); }
+    overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+    slots.delete(card);
+    animating = false;
+  });
+}
+
+/* ---- Swap: oldingi yopilib, keyingisi ochiladi ---- */
+function swapDelta(delta){
+  if(!overlay.classList.contains('open')) return;
+  const nextIndex = (currentIndex + delta + order.length) % order.length;
+  const target = grid.children[nextIndex];
+  swapTo(nextIndex, target);
+}
+function swapTo(newIndex, newCard){
+  if(animating) return;
+  animating = true;
+
+  const oldCard = overlay.querySelector('.card');
+
+  // 1) Eski kartani animatsiya bilan yopamiz
+  if(oldCard){
+    oldCard.classList.remove('pop-in');
+    oldCard.classList.add('pop-out');
+    oldCard.addEventListener('animationend', function onOut(){
+      oldCard.removeEventListener('animationend', onOut);
+      // eski joyiga qaytarish
+      const slot=slots.get(oldCard);
+      if(slot && slot.parent){ slot.parent.insertBefore(oldCard, slot.next||null); }
+      slots.delete(oldCard);
+
+      // 2) Yangi kartani overlayga olib kelib animatsiya bilan ochamiz
+      currentIndex = newIndex;
+      const slotNew = {parent:newCard.parentNode, next:newCard.nextSibling};
+      slots.set(newCard, slotNew);
+      newCard.classList.add('is-open','is-large','pop-in');
+      overlay.appendChild(newCard);
+
+      // animatsiya tugaganda flagni o‘chirib qo‘yamiz
+      newCard.addEventListener('animationend', function onIn(){
+        newCard.removeEventListener('animationend', onIn);
+        animating = false;
+      });
+    });
+  }else{
+    // Eski karta yo‘q — oddiy ochish
+    openLarge(newCard, newIndex);
+    animating = false;
+  }
 }
 
 /* ---- Quiz ---- */
 function startQuiz(){
-  closeLarge();
+  if(animating) return;
+  closeLarge(true); // overlay bo‘lsa darhol yopamiz
   overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
 
@@ -429,9 +500,12 @@ function startQuiz(){
 
   function pool(){
     if(modeSel.value==='letters') return LETTERS.map(x=>({q:x.char, a:x.uz}));
-    // words — tanlangan kategoriya
-    const items = currentCards;
+    const items = getCurrentWordSet(); // so‘zlar
     return items.map(x=>({q:x.ar, a:x.uz}));
+  }
+  function getCurrentWordSet(){
+    const cat = catSel.value || Object.keys(WORD_SETS)[0];
+    return WORD_SETS[cat];
   }
   function nextQ(){
     const P = pool();
@@ -466,6 +540,17 @@ function startQuiz(){
     overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
     document.body.style.overflow=''; wrap.remove(); window.removeEventListener('keydown', onEsc);
   }
+}
+
+/* ====== yordamchi ====== */
+function openLargeFromGridEl(cardEl){
+  const idx = [...grid.children].indexOf(cardEl);
+  if(idx>=0) openOrSwap(cardEl, idx);
+}
+function getModeCards(){
+  return (modeSel.value==='letters')
+    ? LETTERS.map(x=>({type:'letter', ...x}))
+    : (WORD_SETS[catSel.value || Object.keys(WORD_SETS)[0]].map(x=>({type:'word', ...x})));
 }
 </script>
 </body>
