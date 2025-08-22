@@ -8,158 +8,68 @@
 :root{
   --bg:#f4f8ff; --panel:#eaf2ff; --card:#ffffff; --ink:#16324a;
   --accent:#ffd166; --btn:#0aa2ff; --btn-ink:#fff;
-  --card-h:180px; /* kartochka balandligi va placeholder uchun */
+  --card-h:180px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Kufi Arabic",Arial,sans-serif;
-  background:var(--bg); color:var(--ink);
-}
-
-/* ---------- Top ---------- */
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Kufi Arabic",Arial,sans-serif;background:var(--bg);color:var(--ink)}
 .topbar{ text-align:center; padding:18px 12px; background:var(--panel); border-bottom:1px solid #dbe7ff; }
 .topbar h1{margin:0 0 6px; font-size:clamp(18px, 3vw, 28px)}
 .hint{margin:6px 0 0; color:#325c84; font-weight:600}
 
-.toolbar{
-  max-width:1100px; margin:10px auto 0; padding:0 16px;
-  display:flex; gap:8px; justify-content:space-between; align-items:center; flex-wrap:wrap;
-}
-.left, .right{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-.btn{
-  background:var(--btn); color:var(--btn-ink); border:none; border-radius:10px; padding:8px 12px; cursor:pointer;
-  font-weight:700; box-shadow:0 6px 16px rgba(10,162,255,.25);
-}
-.btn.secondary{ background:#e9f4ff; color:#0a3760; box-shadow:none; border:1px solid #cfe3ff; }
-.btn.warn{ background:#ffd166; color:#4a2a00; box-shadow:0 6px 16px rgba(255,209,102,.25); }
+.toolbar{max-width:1100px;margin:10px auto 0;padding:0 16px;display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.left,.right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{background:var(--btn);color:var(--btn-ink);border:none;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:700;box-shadow:0 6px 16px rgba(10,162,255,.25)}
+.btn.secondary{background:#e9f4ff;color:#0a3760;box-shadow:none;border:1px solid #cfe3ff}
+.btn.warn{background:#ffd166;color:#4a2a00;box-shadow:0 6px 16px rgba(255,209,102,.25)}
 .btn:active{transform:translateY(1px)}
-select{
-  padding:8px 10px; border-radius:10px; border:1px solid #cfe3ff; background:#fff;
-}
+select{padding:8px 10px;border-radius:10px;border:1px solid #cfe3ff;background:#fff}
 
-/* ---------- Grid (RTL) ---------- */
-.grid{
-  --min:130px;
-  display:grid; gap:18px; padding:18px; margin:0 auto 28px;
-  grid-template-columns:repeat(auto-fill, minmax(var(--min), 1fr));
-  max-width:1100px;
-  direction: rtl; /* o‘ngdan chapga terish */
-}
-/* Kartochka ichida LTR, arabcha matnni alohida RTL qilamiz */
-.card, .card * { direction: ltr; }
+.grid{--min:130px;display:grid;gap:18px;padding:18px;margin:0 auto 28px;grid-template-columns:repeat(auto-fill,minmax(var(--min),1fr));max-width:1100px;direction:rtl}
+.card,.card *{direction:ltr}
+.placeholder{height:var(--card-h);border-radius:18px;visibility:hidden}
 
-/* Placeholder — karta o‘rnini ushlab turadi */
-.placeholder{
-  height:var(--card-h);
-  border-radius:18px;
-  visibility:hidden;  /* joyni egallaydi, ko‘rinmaydi */
-}
+.card{perspective:1000px;height:var(--card-h)}
+.card-btn{position:relative;width:100%;height:100%;border:0;background:transparent;padding:0;cursor:pointer}
+.inner{position:absolute;inset:0;border-radius:18px;background:var(--card);box-shadow:0 12px 32px rgba(0,0,0,.08);transition:transform .5s cubic-bezier(.2,.7,.2,1),box-shadow .2s;transform-style:preserve-3d;border:1px solid #dfe8f5}
+.card-btn:hover .inner{box-shadow:0 14px 40px rgba(0,0,0,.12)}
+.card.is-open .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;display:flex;align-items:center;justify-content:center;padding:14px}
+.front{background:radial-gradient(circle at 30% -10%,#eaf3ff,#eaf3ff 30%,#fff 30%)}
+.letter,.word{font-family:"Noto Kufi Arabic","Amiri",serif;font-size:clamp(34px,7.6vw,48px);line-height:1.1;color:#0a2450;text-shadow:0 2px 0 #fff,0 10px 24px rgba(10,36,80,.18);text-align:center}
+.back{transform:rotateY(180deg);background:linear-gradient(135deg,#fff7e6,#fff),radial-gradient(120px 80px at 100% 0%,#ffe39b,transparent 70%),radial-gradient(100px 60px at 0% 100%,#cfe9ff,transparent 70%)}
+.info{text-align:center}
+.info .big{font-family:"Noto Kufi Arabic","Amiri",serif;margin:0 0 6px;direction:rtl;font-size:40px}
+.info .name{margin:2px 0 10px;font-weight:800;color:#274a70;font-size:20px}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#eef5ff;border:1px dashed #bcd6f7;color:#0a3a66;font-weight:700}
 
-/* ---------- Card (flip) ---------- */
-.card{ perspective:1000px; height:var(--card-h); }
-.card-btn{ position:relative; width:100%; height:100%; border:0; background:transparent; padding:0; cursor:pointer; }
-.inner{
-  position:absolute; inset:0; border-radius:18px; background:var(--card);
-  box-shadow:0 12px 32px rgba(0,0,0,.08);
-  transition: transform .5s cubic-bezier(.2,.7,.2,1), box-shadow .2s;
-  transform-style: preserve-3d;
-  border:1px solid #dfe8f5;
-}
-.card-btn:hover .inner{ box-shadow:0 14px 40px rgba(0,0,0,.12) }
-.card.is-open .inner{ transform: rotateY(180deg); }
+.card:nth-child(6n+1) .front{background:radial-gradient(circle at 30% -10%,#e3f7ff,#e3f7ff 30%,#fff 30%)}
+.card:nth-child(6n+2) .front{background:radial-gradient(circle at 70% -10%,#ffe9f3,#ffe9f3 30%,#fff 30%)}
+.card:nth-child(6n+3) .front{background:radial-gradient(circle at 20% -10%,#fff3d9,#fff3d9 30%,#fff 30%)}
+.card:nth-child(6n+4) .front{background:radial-gradient(circle at 70% -10%,#ecffe9,#ecffe9 30%,#fff 30%)}
+.card:nth-child(6n+5) .front{background:radial-gradient(circle at 30% -10%,#f1e9ff,#f1e9ff 30%,#fff 30%)}
+.card:nth-child(6n+6) .front{background:radial-gradient(circle at 70% -10%,#ffe9e9,#ffe9e9 30%,#fff 30%)}
 
-.face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:18px; display:flex; align-items:center; justify-content:center; padding:14px; }
-.front{ background: radial-gradient(circle at 30% -10%, #eaf3ff, #eaf3ff 30%, #ffffff 30%); }
-.letter, .word{
-  font-family:"Noto Kufi Arabic","Amiri",serif;
-  font-size: clamp(34px, 7.6vw, 48px);
-  line-height:1.1; color:#0a2450;
-  text-shadow: 0 2px 0 #fff, 0 10px 24px rgba(10,36,80,.18);
-  text-align:center;
-}
-.back{
-  transform: rotateY(180deg);
-  background:
-    linear-gradient(135deg, #fff7e6, #fff),
-    radial-gradient(120px 80px at 100% 0%, #ffe39b, transparent 70%),
-    radial-gradient(100px 60px at 0% 100%, #cfe9ff, transparent 70%);
-}
-.info{ text-align:center; }
-.info .big{
-  font-family:"Noto Kufi Arabic","Amiri",serif; margin:0 0 6px; direction:rtl;
-  font-size:40px;
-}
-.info .name{ margin:2px 0 10px; font-weight:800; color:#274a70; font-size:20px; }
-.badge{display:inline-block; padding:4px 10px; border-radius:999px; background:#eef5ff; border:1px dashed #bcd6f7; color:#0a3a66; font-weight:700}
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,15,31,0);backdrop-filter:blur(0px) scale(1);z-index:50;padding:18px;direction:rtl;opacity:0;pointer-events:none;transition:background .35s ease,backdrop-filter .35s ease,opacity .35s ease}
+.overlay.open{background:rgba(2,15,31,.55);backdrop-filter:blur(3px) scale(1.02);opacity:1;pointer-events:auto}
+.ov-close{position:absolute;left:14px;top:12px;z-index:60;border:none;background:var(--accent);color:#4a2a00;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:24px;font-weight:900;box-shadow:0 8px 22px rgba(0,0,0,.25)}
+.nav{position:absolute;inset-inline:16px;top:50%;transform:translateY(-50%);display:flex;justify-content:space-between;pointer-events:none}
+.nav button{pointer-events:auto;width:44px;height:44px;border-radius:50%;border:none;background:#ffffffcc;color:#0a2b52;font-size:22px;cursor:pointer;box-shadow:0 10px 22px rgba(0,0,0,.2)}
 
-/* rangli frontlar */
-.card:nth-child(6n+1) .front{background: radial-gradient(circle at 30% -10%, #e3f7ff, #e3f7ff 30%, #fff 30%);}
-.card:nth-child(6n+2) .front{background: radial-gradient(circle at 70% -10%, #ffe9f3, #ffe9f3 30%, #fff 30%);}
-.card:nth-child(6n+3) .front{background: radial-gradient(circle at 20% -10%, #fff3d9, #fff3d9 30%, #fff 30%);}
-.card:nth-child(6n+4) .front{background: radial-gradient(circle at 70% -10%, #ecffe9, #ecffe9 30% , #fff 30%);}
-.card:nth-child(6n+5) .front{background: radial-gradient(circle at 30% -10%, #f1e9ff, #f1e9ff 30%, #fff 30%);}
-.card:nth-child(6n+6) .front{background: radial-gradient(circle at 70% -10%, #ffe9e9, #ffe9e9 30%, #fff 30%);}
+.card.is-large{width:min(92vw,460px);height:min(80vh,520px)}
+.card.pop-in{transform:scale(.7) translateY(30px);opacity:0;animation:popIn .45s cubic-bezier(.25,.8,.25,1) forwards}
+.card.pop-out{transform:scale(1) translateY(0);opacity:1;animation:popOut .35s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes popIn{0%{transform:scale(.7) translateY(30px);opacity:0}60%{transform:scale(1.05) translateY(-6px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
+@keyframes popOut{0%{transform:scale(1) translateY(0);opacity:1}100%{transform:scale(.7) translateY(40px);opacity:0}}
 
-/* ---------- Overlay (modal) — blur+zoom fon + animatsiya ---------- */
-.overlay{
-  position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-  background: rgba(2,15,31,0.0);
-  backdrop-filter: blur(0px) scale(1);
-  z-index:50; padding:18px;
-  direction: rtl;
-  opacity:0; pointer-events:none;
-  transition: background .35s ease, backdrop-filter .35s ease, opacity .35s ease;
-}
-.overlay.open{
-  background: rgba(2,15,31,0.55);
-  backdrop-filter: blur(3px) scale(1.02);
-  opacity:1; pointer-events:auto;
-}
-.ov-close{
-  position:absolute; left:14px; top:12px; z-index:60;
-  border:none; background:var(--accent); color:#4a2a00;
-  width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:24px; font-weight:900;
-  box-shadow:0 8px 22px rgba(0,0,0,.25);
-}
-.nav{
-  position:absolute; inset-inline:16px; top:50%; transform:translateY(-50%);
-  display:flex; justify-content:space-between; pointer-events:none;
-}
-.nav button{
-  pointer-events:auto; width:44px; height:44px; border-radius:50%; border:none;
-  background:#ffffffcc; color:#0a2b52; font-size:22px; cursor:pointer; box-shadow:0 10px 22px rgba(0,0,0,.2);
-}
+.card.is-large .letter{font-size:clamp(72px,14vw,110px)}
+.card.is-large .info .big{font-size:clamp(48px,8vw,80px)}
+.card.is-large .info .name{font-size:clamp(22px,3.6vw,32px)}
 
-/* Katta karta o‘lchamlari */
-.card.is-large{ width:min(92vw, 460px); height:min(80vh, 520px); }
-
-/* Ochilish/yopilish animatsiyalari */
-.card.pop-in{ transform: scale(0.7) translateY(30px); opacity:0; animation: popIn .45s cubic-bezier(.25,.8,.25,1) forwards; }
-.card.pop-out{ transform: scale(1) translateY(0); opacity:1; animation: popOut .35s cubic-bezier(.4,.0,.2,1) forwards; }
-@keyframes popIn{
-  0%{ transform:scale(0.7) translateY(30px); opacity:0; }
-  60%{ transform:scale(1.05) translateY(-6px); opacity:1; }
-  100%{ transform:scale(1) translateY(0); opacity:1; }
-}
-@keyframes popOut{
-  0%{ transform:scale(1) translateY(0); opacity:1; }
-  100%{ transform:scale(0.7) translateY(40px); opacity:0; }
-}
-
-/* Katta rejimda matn o‘lchami */
-.card.is-large .letter{ font-size: clamp(72px, 14vw, 110px); }
-.card.is-large .info .big{ font-size: clamp(48px, 8vw, 80px); }
-.card.is-large .info .name{ font-size: clamp(22px, 3.6vw, 32px); }
-
-/* ---------- Dark Mode ---------- */
-.dark{
-  --bg:#0e1726; --panel:#0b1423; --card:#101a2b; --ink:#dbe8ff; --btn:#3aaefc; --btn-ink:#05233b;
-}
+.dark{--bg:#0e1726;--panel:#0b1423;--card:#101a2b;--ink:#dbe8ff;--btn:#3aaefc;--btn-ink:#05233b}
 .dark .topbar{border-bottom-color:#10213a}
-.dark .inner{border-color:#1a2a44; box-shadow:0 8px 24px rgba(0,0,0,.5)}
-.dark .front{background: radial-gradient(circle at 30% -10%, #152338, #152338 30%, #0f1b2d 30%);}
+.dark .inner{border-color:#1a2a44;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.dark .front{background:radial-gradient(circle at 30% -10%,#152338,#152338 30%,#0f1b2d 30%)}
 .dark .ov-close{background:#ffc95b}
 .dark .btn.secondary{background:#0f2139;color:#dbe8ff;border-color:#1d3b63}
 </style>
@@ -177,11 +87,9 @@ select{
         <option value="letters">Harf</option>
         <option value="words">So‘zlar</option>
       </select>
-
       <label for="category" id="cat-label" style="display:none;">Mavzu:</label>
       <select id="category" style="display:none;"></select>
     </div>
-
     <div class="right">
       <button id="btn-shuffle" class="btn">🔀 Aralashtirish</button>
       <button id="btn-reset"   class="btn secondary">↩️ Qaytarish</button>
@@ -190,26 +98,19 @@ select{
     </div>
   </div>
 
-  <main>
-    <section id="grid" class="grid" aria-live="polite"></section>
-  </main>
+  <main><section id="grid" class="grid" aria-live="polite"></section></main>
 
-  <!-- Overlay (kattalashgan karta) -->
   <div id="overlay" class="overlay" aria-hidden="true">
     <button id="ov-close" class="ov-close" aria-label="Yopish">×</button>
-    <div class="nav">
-      <button id="prev" aria-label="Oldingi">‹</button>
-      <button id="next" aria-label="Keyingi">›</button>
-    </div>
+    <div class="nav"><button id="prev" aria-label="Oldingi">‹</button><button id="next" aria-label="Keyingi">›</button></div>
   </div>
 
-  <!-- Quiz modal (overlaydan foydalanamiz) -->
   <template id="quiz-tpl">
     <div class="quiz">
       <style>
         .quiz-wrap{background:var(--card);border-radius:18px;padding:18px;max-width:560px;width:min(92vw,560px);
                    box-shadow:0 18px 40px rgba(0,0,0,.25);border:1px solid #dfe8f5;text-align:center}
-        .quiz .harf{font-family:"Noto Kufi Arabic","Amiri",serif;font-size:80px;margin:0 0 10px}
+        .quiz .harf{font-family:"Noto Kufi Arabic","Amiri",serif;font-size:80px;margin:0 0 10px;direction:rtl}
         .quiz .opts{display:grid;gap:10px;margin-top:6px}
         .quiz .opts button{padding:10px 12px;border-radius:12px;border:1px solid #cfe3ff;cursor:pointer;background:#eaf4ff;font-weight:700}
         .quiz .opts button.good{background:#d9f9d9;border-color:#7fce7f}
@@ -220,108 +121,183 @@ select{
       <div class="quiz-wrap">
         <div class="harf" id="q-char"></div>
         <div class="opts" id="q-opts"></div>
-        <div class="foot">
-          <div class="score" id="q-score">0/0</div>
-          <button class="btn" id="q-next">Keyingi</button>
-        </div>
+        <div class="foot"><div class="score" id="q-score">0/0</div><button class="btn" id="q-next">Keyingi</button></div>
       </div>
     </div>
   </template>
 
 <script>
-/* =================== MA'LUMOTLAR =================== */
+/* ====== HARFLAR (faqat arabcha nom ko‘rsatiladi) ====== */
 const LETTERS = [
-  L("ا","Alif","ألف"), L("ب","Bo","باء"), L("ت","To","تاء"), L("ث","Sa","ثاء"),
-  L("ج","Jim","جيم"), L("ح","Ho","حاء"), L("خ","Xo","خاء"), L("د","Dal","دال"),
-  L("ذ","Zal","ذال"), L("ر","Ro","راء"), L("ز","Zo","زاي"), L("س","Sin","سين"),
-  L("ش","Shin","شين"), L("ص","Sod","صاد"), L("ض","Dod","ضاد"), L("ط","To‘","طاء"),
-  L("ظ","Zo‘","ظاء"), L("ع","Ayn","عين"), L("غ","G‘ayn","غين"), L("ف","Fo","فاء"),
-  L("ق","Qof","قاف"), L("ك","Kaf","كاف"), L("ل","Lam","لام"), L("م","Mim","ميم"),
-  L("ن","Nun","نون"), L("ه","Ha","هاء"), L("و","Vav","واو"), L("ي","Ya","ياء"),
+  L("ا","ألف"), L("ب","باء"), L("ت","تاء"), L("ث","ثاء"),
+  L("ج","جيم"), L("ح","حاء"), L("خ","خاء"), L("د","دال"),
+  L("ذ","ذال"), L("ر","راء"), L("ز","زاي"), L("س","سين"),
+  L("ش","شين"), L("ص","صاد"), L("ض","ضاد"), L("ط","طاء"),
+  L("ظ","ظاء"), L("ع","عين"), L("غ","غين"), L("ف","فاء"),
+  L("ق","قاف"), L("ك","كاف"), L("ل","لام"), L("م","ميم"),
+  L("ن","نون"), L("ه","هاء"), L("و","واو"), L("ي","ياء"),
 ];
-function L(char, uz, ar){ return {char, uz, ar}; }
+function L(char, nameAr){ return {char, nameAr}; }
 
+/* ====== SO‘ZLAR TO‘PLAMLARI (kam bo‘lsa 50 taga to‘ldiriladi) ====== */
+function W(ar, uz){ return {ar, uz}; }
 const WORD_SETS = {
-  "Hayvonlar": [
-    W("أَسَد","Sher"), W("قِطَّة","Mushuk"), W("كَلْب","It"), W("حِصَان","Ot"), 
-    W("طَائِر","Qush"), W("سَمَك","Baliq")
+  "Hayvonlar":[
+    W("أَسَد","Sher"),W("قِطَّة","Mushuk"),W("كَلْب","It"),W("حِصَان","Ot"),W("نَمِر","Yo‘lbars"),
+    W("فِيل","Fil"),W("زَرَافَة","Jirafa"),W("قِرْد","Maymun"),W("ثَعْلَب","Tulki"),W("ذِئْب","Bo‘ri"),
+    W("دُبّ","Ayiq"),W("غَزَال","Jeyran"),W("جَمَل","Tuyá"),W("جَدْي","Echki"),W("خَرُوف","Qo‘y"),
+    W("بَقَرَة","Sigir"),W("مَعْز","Echki (umumiy)"),W("حَمَامَة","Kabutar"),W("بُوم","Boyo‘g‘li"),W("نَعَامَة","Tovus (N’yamo)"),
+    W("دِيك","Xo‘roz"),W("دَجَاجَة","Tovuq"),W("بَطَّة","O‘rdak"),W("إِوَزّ","G‘oz"),W("غُرَاب","Qarg‘a"),
+    W("نَحْل","Asalari"),W("فَرَاشَة","Kapalak"),W("نَمْل","Chumoli"),W("ذُبَاب","Pashsha"),W("بَعُوضَة","Chivin"),
+    W("حِصَانِ بَحْر","Dengiz oti"),W("سَمَك","Baliq"),W("قِرْش","Akula"),W("دُولْفِين","Delfin"),W("حُوت","Kit"),
+    W("سُلْحُفاة","Toshbaqa"),W("تِمْسَاح","Timsoh"),W("ضِفْدَع","Qurbaqa"),W("حِرْبَاء","Xameleon"),W("ثُعْبَان","Ilon"),
+    W("فَأْر","Sichqon"),W("أَرْنَب","Quyon"),W("خُفَّاش","Ko‘rshapalak"),W("غَزَال","Gazal"),W("مَهْر","Quyoncha"),
+    W("رِخَال","Eshshak"),W("حِمَار","Eshshak"),W("بَبْغَاء","To‘ti"),W("طَاوُوس","Tovus"),W("كَنْغَر","Kenguru")
   ],
-  "Mevalar": [
-    W("تُفَّاح","Olma"), W("مَوْز","Banan"), W("عِنَب","Uzum"), W("بُرْتُقَال","Apelsin"),
-    W("لَيْمُون","Limon"), W("فِرَاوِلَة","Qulupnay")
+  "Mevalar":[
+    W("تُفَّاح","Olma"),W("مَوْز","Banan"),W("عِنَب","Uzum"),W("بُرْتُقَال","Apelsin"),W("لَيْمُون","Limon"),
+    W("إِجَّاص","Nok"),W("خُوخ","Shaftoli"),W("مِشْمِش","O‘rik"),W("كَرَز","Olcha"),W("فِرَاوِلَة","Qulupnay"),
+    W("رُمَّان","Anor"),W("تِين","Anjir"),W("بَطِّيخ","Tarvuz"),W("شَمَّام","Qovun"),W("كِيوي","Kivi"),
+    W("أَنَانَاس","Ananas"),W("مَنْجَا","Mango"),W("جَوَّافَة","Guava"),W("بِطِّيخ أَصْفَر","Garmdori"),W("تُوت","Tut"),
+    W("تُوت أَسْوَد","Qora tut"),W("تُوت أَحْمَر","Qizil tut"),W("بِلاَكْبِيرِي","Qoraqat"),W("تُوت أَرْضِيّ","Qulupnay (er)"),
+    W("نَارِينْج","Mandarin"),W("بُرْقُوق","Olxo‘ri"),W("جَوْزُ الْهِنْد","Kokos"),W("بَنْدَنِس","Bergamot"),W("تَمْر","Xurmo"),
+    W("زَيْتُون","Zaytun"),W("أَفُوكَادُو","Avokado"),W("تَمَرُ الْهِنْد","Tamarind"),W("قِشْطَة","Cherimoya"),W("كُمَّثْرَى شَوْكِيَّة","Opuntiya"),
+    W("بِطِّيخ ثَلْجِيّ","Qovun (oq)"),W("بِطِّيخ أَخْضَر","Tarvuz (yashil)"),W("مِيلُون","Qovun turi"),W("بَرْقُوق مُجَفَّف","Qurut olxo‘ri"),W("زَبِيب","Mayiz"),
+    W("عِنَب أَخْضَر","Yashil uzum"),W("عِنَب أَحْمَر","Qizil uzum"),W("تُفَّاح أَخْضَر","Yashil olma"),W("تُفَّاح أَحْمَر","Qizil olma"),W("تُفَّاح أَصْفَر","Sariq olma"),
+    W("كَرَز أَسْوَد","Qora olcha"),W("تُوت بُرِّيّ","Yovvoyi rezavor"),W("بُوشْكَة","Feixoa"),W("رِيبَاس","Ryevin"),W("بِشْمَلَة","Mushmula")
   ],
-  "Ranglar": [
-    W("أَحْمَر","Qizil"), W("أَزْرَق","Ko‘k"), W("أَخْضَر","Yashil"), W("أَصْفَر","Sariq"),
-    W("أَسْوَد","Qora"), W("أَبْيَض","Oq"), W("بُنِّيّ","Jigarrang"),
-    W("بَنَفْسَجِيّ","Siyohrang"), W("بُرْتُقَالِيّ","To‘q sariq"), W("وَرْدِيّ","Pushti")
+  "Ranglar":[
+    W("أَسْوَد","Qora"),W("أَبْيَض","Oq"),W("أَحْمَر","Qizil"),W("أَزْرَق","Ko‘k"),W("أَخْضَر","Yashil"),
+    W("أَصْفَر","Sariq"),W("بُنِّيّ","Jigarrang"),W("رَمَادِيّ","Kulrang"),W("بَنَفْسَجِيّ","Siyohrang"),W("زَهْرِيّ / وَرْدِيّ","Pushti"),
+    W("بُرْتُقَالِيّ","To‘q sariq"),W("سَمَاوِيّ","Osmong rang"),W("نِيلِيّ","Indigo"),W("ذَهَبِيّ","Oltin"),W("فِضِّيّ","Kumush"),
+    W("لِيلَك","Lila"),W("كُحْلِيّ","To‘q ko‘k"),W("زَيْتُونِيّ","Zaytuni"),W("خَمْرِيّ","Maroon"),W("كَرِيمِيّ","Krem"),
+    W("مِغْرِيّ","Bej"),W("مَوْف","Mov"),W("طُوبِيّ","G‘isht rang"),W("سَكَّرِيّ","Shakar rang"),W("تُرْكُوَاز","Firuz"),
+    W("نُحَاسِيّ","Mis rang"),W("خَوْخِيّ","Shaftolirang"),W("لَيْمُونِيّ","Limon rang"),W("فِسْفُورِيّ","Neon"),W("فِيرُوزِيّ","Firuz rang"),
+    W("بَنِّيٌّ فَاتِح","Och jigarrang"),W("بَنِّيٌّ غَامِق","To‘q jigarrang"),W("أَخْضَرُ فَاتِح","Och yashil"),W("أَخْضَرُ غَامِق","To‘q yashil"),W("أَزْرَقُ فَاتِح","Och ko‘k"),
+    W("أَزْرَقُ غَامِق","To‘q ko‘k"),W("رَمَادِيٌّ فَاتِح","Och kulrang"),W("رَمَادِيٌّ غَامِق","To‘q kulrang"),W("بَنَفْسَجِيٌّ فَاتِح","Och siyohrang"),W("بَنَفْسَجِيٌّ غَامِق","To‘q siyohrang"),
+    W("خَزَفِيّ","Keramik rang"),W("صَخْرِيّ","Tosh rang"),W("بَحْرِيّ","Dengiz rang"),W("صَحْرَاوِيّ","Cho‘l rang"),W("شُكُولَاتِيّ","Shokolad"),
+    W("قِرْمِزِيّ","Qirmizi"),W("وَرْدُيّ هَادِئ","Pastel pushti"),W("مِنْتِيّ","Yalpiz rang"),W("بَنَانِيّ","Banan rang"),W("مُعْتِم","Mat rang")
   ],
-  "Qarindoshlar": [
-    W("أَب","Ota"), W("أُمّ","Ona"), W("أَخ","Aka/uka"), W("أُخْت","Opa/singil"), 
-    W("جَدّ","Bobo"), W("جَدَّة","Buvi"), W("عَمّ","Amaki"), W("عَمَّة","Amma"),
-    W("خَال","Tog‘a"), W("خَالَة","Xola")
+  "Qarindoshlar":[
+    W("أَب","Ota"),W("أُمّ","Ona"),W("اِبْن","O‘g‘il"),W("بِنْت","Qiz"),W("أَخ","Aka/uka"),
+    W("أُخْت","Opa/singil"),W("زَوْج","Er"),W("زَوْجَة","Xotin"),W("جَدّ","Bobo"),W("جَدَّة","Buvi"),
+    W("حَفِيد","Nabira (o‘g‘il)"),W("حَفِيدَة","Nabira (qiz)"),W("عَمّ","Amaki"),W("عَمَّة","Amma"),W("خَال","Tog‘a"),
+    W("خَالَة","Xola"),W("صِهْر","Qu’da"),W("كَنَّة","Kelin"),W("حَمَاة","Qaynona"),W("حَم","Qaynata"),
+    W("صَاحِب","Do‘st (erkak)"),W("صَدِيقَة","Do‘st (ayol)"),W("قَرِيب","Qarindosh"),W("نَسَب","Nasab"),W("عَائِلَة","Oila"),
+    W("تَوْأَم","Egil egizak"),W("مَوْلُود","Yangi tug‘ilgan"),W("عُرْس","To‘y"),W("خَطِيب","Kuyov nomzod"),W("خَطِيبَة","Kelin nomzod"),
+    W("رِضَاع","Sut emizish"),W("رَبِيب","O‘gay farzand"),W("زَوْجَان","Er-xotin"),W("وَالِدَان","Ota-ona"),W("أَقَارِب","Qarindoshlar"),
+    W("عَمُومَة","Amakilar"),W("خُؤُولَة","Tog‘alar"),W("أَصْهَار","Quda-anda"),W("نَسِيب","Quda"),W("صِهْرٌ آخَر","Quda (boshqa)"),
+    W("عَمّ أَكْبَر","Katta amaki"),W("عَمّ أَصْغَر","Kichik amaki"),W("خَال أَكْبَر","Katta tog‘a"),W("خَال أَصْغَر","Kichik tog‘a"),W("قَرِينَة","Rafiqa"),
+    W("صِهْر الصِّهْر","Quda-ning qudasi"),W("نَسَبٌ بَعِيد","Uzoq qarindosh"),W("مُرَبِّي","Tarbiya qiluvchi"),W("وَلِيّ","Vasiy"),W("عَصَبَة","Erkak qarindoshlar guruhi")
   ],
-  "Tana a’zolari": [
-    W("رَأْس","Bosh"), W("وَجْه","Yuz"), W("عَيْن","Ko‘z"), W("أُذُن","Quloq"),
-    W("فَم","Og‘iz"), W("أَنْف","Burun"), W("يَد","Qo‘l"), W("رِجْل","Oyoq"),
-    W("قَلْب","Yurak"), W("شَعْر","Soch")
+  "Tana a’zolari":[
+    W("رَأْس","Bosh"),W("وَجْه","Yuz"),W("شَعْر","Soch"),W("جَبْهَة","Peshona"),W("عَيْن","Ko‘z"),
+    W("حَاجِب","Qosh"),W("رِمْش","Kiprik"),W("أُذُن","Quloq"),W("أَنْف","Burun"),W("فَم","Og‘iz"),
+    W("شَفَة","Lab"),W("سِنّ","Tish"),W("لِسَان","Til"),W("رَقَبَة","Bo‘yin"),W("كَتِف","Yelka"),
+    W("صَدْر","Ko‘krak"),W("ذِرَاع","Bilak"),W("يَد","Qo‘l"),W("كَفّ","Kaft"),W("إِبْهَام","Bosh barmoq"),
+    W("أُصْبُع","Barmoq"),W("ظُفْر","Tirnoq"),W("ظَهْر","Bel"),W("بَطْن","Qorin"),W("خَاصِرَة","Bel yon"),
+    W("وَرِك","Son"),W("رِجْل","Oyoq"),W("رُكْبَة","Tizza"),W("كَعْب","Tovon"),W("قَدَم","Oyoq panja"),
+    W("قَلْب","Yurak"),W("رِئَة","O‘pka"),W("كِبِد","Jigar"),W("مِعْدَة","Me’da"),W("كُلْيَة","Buyrak"),
+    W("دِمَاغ","Miya"),W("عَصَب","Asab"),W("عَظْم","Suyak"),W("دَم","Qon"),W("جِلْد","Teri"),
+    W("مِرْفَق","Tirsak"),W("مِعْصَم","Bilak bo‘g‘imi"),W("كَتِفَان","Yelkalar"),W("حُجْرَةُ الصَّدْر","Ko‘krak qafasi"),W("شَعْرُ الْوَجْهِ","Yuz soqoli"),
+    W("حَنَك","Jaq"),W("حَلْق","Tomoq"),W("حَلْقُوم","Hiqildoq"),W("كَبِدَة","Jigar (k)"),W("نُخَاع","Uq (orqa miya)")
   ],
-  "Sinfxona": [
-    W("كِتَاب","Kitob"), W("قَلَم","Ruchka"), W("دَفْتَر","Daftar"), W("كُرْسِيّ","Stul"),
-    W("طَاوِلَة","Stol"), W("مُعَلِّم","O‘qituvchi")
+  "Sinfxona":[
+    W("كِتَاب","Kitob"),W("قَلَم","Ruchka"),W("قَلَم رَصَاص","Qalam"),W("مِمْحَاة","O‘chirg‘ich"),W("مِسْطَرَة","Chizg‘ich"),
+    W("دَفْتَر","Daftar"),W("حَقِيبَة","Sumka"),W("مِقْعَد","Parta"),W("كُرْسِيّ","Stul"),W("طَاوِلَة","Stol"),
+    W("سَبُّورَة","Doská"),W("طَبْشُور","Bo‘r"),W("مِمْحَاة سَبُّورَة","Doska o‘chirgich"),W("مُعَلِّم","O‘qituvchi"),W("تِلْمِيذ","O‘quvchi"),
+    W("مِقَصّ","Qaychi"),W("صَمْغ","Yelim"),W("مِبْرَاة","Pichoqcha (o‘tkirlagich)"),W("مِسْطَرَة مِتْرِيَّة","Rulétka"),W("مِكْنَسَة","Supurgi"),
+    W("مِسْجِل","Dastur yozuvchi/registrator"),W("حَاسُوب","Kompyuter"),W("لَابْتُوب","Noutbuk"),W("لَوْحَة مَفَاتِيح","Klaviatura"),W("فَأْرَة","Sichqoncha"),
+    W("مِسْجِل صَوْت","Magnitofon"),W("مِسْلاَط","Proyektor"),W("شَاشَة","Ekran"),W("كِتَابٌ مَدْرَسِيّ","Darslik"),W("قَامُوس","Lug‘at"),
+    W("خَرِيطَة","Xarita"),W("كُرَة أَرْضِيَّة","Globus"),W("جَرِيدَة حَائِط","Stend"),W("بَاب","Eshik"),W("نَافِذَة","Deraza"),
+    W("سَاعَة","Soat"),W("جَرَس","Qo‘ng‘iroq"),W("مِدْفَأَة","Isitgich"),W("مِكْيَف","Konditsioner"),W("مِصْبَاح","Chiroq"),
+    W("مَسْرَح","Sahna"),W("مِسْرَحِيَّة","Sahna asari"),W("مِخْتَبَر","Laboratoriya"),W("مِجْهَر","Mikroskop"),W("مِسْطَرَة مُنْحَنِيَة","Sirkul"),
+    W("أَوْرَاق","Qog‘ozlar"),W("وَرَقَة اِخْتِبَار","Nazorat varaqasi"),W("حِسَاب","Hisob"),W("هِنْدَسَة","Geometriya"),W("جُغْرَافِيَا","Geografiya")
   ],
-  "Transport": [
-    W("سَيَّارَة","Mashina"), W("دَرَّاجَة","Velosiped"), W("حَافِلَة","Avtobus"),
-    W("قِطَار","Poyezd"), W("طَائِرَة","Samolyot"), W("قَارِب","Qayiq")
+  "Transport":[
+    W("سَيَّارَة","Mashina"),W("دَرَّاجَة","Velosiped"),W("دَرَّاجَة نَارِيَّة","Motosikl"),W("حَافِلَة","Avtobus"),W("قِطَار","Poyezd"),
+    W("طَائِرَة","Samolyot"),W("سَفِينَة","Kema"),W("قَارِب","Qayiq"),W("مِتْرُو","Metro"),W("تَكْسِي","Taksi"),
+    W("شَاحِنَة","Yuk mashinasi"),W("قِطَار سَرِيع","Tez poyezd"),W("حَافِلَة مَدْرَسِيَّة","Maktab avtobusi"),W("تِلِفِرِيك","Kanat yo‘l"),W("مِرْوَحِيَّة","Vertolyot"),
+    W("قَارِب شِرَاعِيّ","Yelkanli qayiq"),W("سُفُن حَاوِيَات","Konteyner kema"),W("قِطَار بَضَائِع","Yuk poyezdi"),W("سَيَّارَة أُجْرَة","Taxi"),W("سَيَّارَة إِسْعَاف","Tez yordam"),
+    W("سَيَّارَة إِطْفَاء","O‘t o‘chiruv"),W("مِدْرَج","Yo‘lak (aero)"),W("مِينَاء","Port"),W("مَوْقِف","Bekat"),W("مِرْسَى","Kayuta"),
+    W("جِسْر","Ko‘prik"),W("نَفَق","Tonnel"),W("مِطَار","Aeroport"),W("مَحَطَّة","Stansiya"),W("شَاحِنَة صَغِيرَة","Pikap"),
+    W("سَيَّارَة رِيَاضِيَّة","Sport mashina"),W("قَطَار أَنْدَرْغِرَاوْنْد","Yerosti poyezdi"),W("قَاطِرَة","Vagon tortuvchi"),W("قَارِب دَفَّاع","Qutqaruv qayiq"),W("حَافِلَة لَيلِيَّة","Tungi avtobus"),
+    W("تَرام","Tramvay"),W("تِرُولِيبُوس","Trollébus"),W("سُكُوتَر","Skuter"),W("عَرَبَة","Arava"),W("حَنطُور","Kareta"),
+    W("قَافِلَة","Karvon"),W("مِزْلَج","Chang‘ich"),W("زَلَّاقَة","Sanoqchán"),W("قِطَار مِغْنَاطِيسِيّ","Maglev"),W("قِطَار أُحَادِيّ","Monorels"),
+    W("قِطَاع طَيَرَان","Aviatsiya"),W("مِرْسَى يَخْت","Yaxta joyi"),W("يَخْت","Yaxta"),W("سِكَّة حَدِيد","Temir yo‘l"),W("تَذْكِرَة","Chipta")
   ],
-  "Tabiat": [
-    W("شَمْس","Quyosh"), W("قَمَر","Oy"), W("نَجْمَة","Yulduz"), W("شَجَرَة","Daraxt"),
-    W("زَهْرَة","Gul"), W("بَحْر","Dengiz")
+  "Tabiat":[
+    W("شَمْس","Quyosh"),W("قَمَر","Oy"),W("نَجْمَة","Yulduz"),W("سَحَاب","Bulut"),W("مَطَر","Yomg‘ir"),
+    W("ثَلْج","Qor"),W("رِيح","Shamol"),W("قَوْس قُزَح","Kamalak"),W("بَحْر","Dengiz"),W("مُحِيط","Okean"),
+    W("نَهْر","Daryo"),W("بُحَيْرَة","Ko‘l"),W("شَلاَّل","Sharshara"),W("جَبَل","Tog‘"),W("وَادٍ","Vodiy"),
+    W("سَهْل","Tekislik"),W("صَحْرَاء","Cho‘l"),W("غَابَة","O‘rmon"),W("شَجَرَة","Daraxt"),W("عُشْب","O‘t"),
+    W("زَهْرَة","Gul"),W("تُرَاب","Tuproq"),W("حَجَر","Tosh"),W("بُرْكَان","Vulqon"),W("زَلْزَال","Zilzila"),
+    W("إِعْصَار","To‘fon"),W("رَعْد","Momaqaldiroq"),W("بَرْق","Yashin"),W("ضَبَاب","Tuman"),W("نَدَى","Shabnam"),
+    W("مَرْج","Yaylov"),W("كَهْف","G‘or"),W("جَزِيرَة","Orol"),W("شِبْهُ جَزِيرَة","Yarim orol"),W("سَاحِل","Sohil"),
+    W("مَضِيق","Bo‘g‘oz"),W("قَارَّة","Qit’a"),W("قِطْب","Qutb"),W("جَلِيد","Muz"),W("حَدِيقَة","Bog‘"),
+    W("رِمَال","Qumlar"),W("مَوْج","To‘lqin"),W("يَابِسَة","Quruqlik"),W("رَافِد","Irmok"),W("مَسِيل","Kichik irmoq")
   ],
-  "Taomlar": [
-    W("خُبْز","Non"), W("مَاء","Suv"), W("حَلِيب","Sut"), W("أَرُزّ","Guruch"),
-    W("لَحْم","Go‘sht"), W("جُبْن","Pishloq")
+  "Taomlar":[
+    W("خُبْز","Non"),W("مَاء","Suv"),W("حَلِيب","Sut"),W("أَرُزّ","Guruch"),W("مَعْكَرُونَة","Makaron"),
+    W("لَحْم","Go‘sht"),W("دَجَاج","Tovuq go‘shti"),W("سَمَك","Baliq"),W("حَسَاء","Sho‘rva"),W("بَيْض","Tuxum"),
+    W("جُبْن","Pishloq"),W("زُبْدَة","Sariyog‘"),W("زَيْت","Yog‘"),W("سُكَّر","Shakar"),W("مِلْح","Tuz"),
+    W("تَابِل","Ziravor"),W("سَلَطَة","Salat"),W("كَباب","Kabob"),W("مَنْدِي","Mandi"),W("مَسْلُوق","Qaynatma"),
+    W("مَقْلِيّ","Qovurilgan"),W("مَشْوِيّ","Kuydirilgan"),W("مُرَبَّى","Murabbo"),W("عَسَل","Asal"),W("مُعَجِّنَات","Xamir ovqat"),
+    W("حَلْوَى","Shirinlik"),W("بِسْكُوِيت","Pishiriq"),W("كَعْك","Keks"),W("فَطِيرَة","Pirog"),W("سَامْبُوسَة","Samosa"),
+    W("مَقْلُوبَة","Maqlooba"),W("مَطْبُوخ","Dimlama"),W("مَحْشِي","Qiyma to‘ldirma"),W("مُخَلَّل","Marinad"),W("زَلَابِيَة","Zalabiya"),
+    W("بِرْيَانِي","Biryani"),W("مِشْرُوب","Ichimlik"),W("شَاي","Choy"),W("قَهْوَة","Qahva"),W("عَصِير","Sharbat"),
+    W("فَطَائِر","Ichli non"),W("مَعْجُون","Pasta"),W("سَجَق","Kolbasa"),W("نُودِلْز","Nudels"),W("شَطِيرَة","Sendvich")
   ]
 };
-function W(ar, uz){ return {ar, uz}; }
+
+/* === agar 50 tadan kam bo‘lsa — 50 taga to‘ldiruvchi yordamchi === */
+function ensureFifty(arr){
+  const out = arr.slice();
+  let i=0;
+  while(out.length<50 && arr.length){
+    const base = arr[i % arr.length];
+    out.push({ar: base.ar, uz: base.uz + " (takror)"});
+    i++;
+  }
+  return out.slice(0,50);
+}
 
 /* =================== DOM & HOLAT =================== */
-const grid      = document.getElementById('grid');
-const overlay   = document.getElementById('overlay');
-const ovClose   = document.getElementById('ov-close');
-const btnPrev   = document.getElementById('prev');
-const btnNext   = document.getElementById('next');
+const grid = document.getElementById('grid');
+const overlay = document.getElementById('overlay');
+const ovClose = document.getElementById('ov-close');
+const btnPrev = document.getElementById('prev');
+const btnNext = document.getElementById('next');
 
-const modeSel   = document.getElementById('mode');
-const catSel    = document.getElementById('category');
-const catLabel  = document.getElementById('cat-label');
+const modeSel = document.getElementById('mode');
+const catSel  = document.getElementById('category');
+const catLabel= document.getElementById('cat-label');
 
-const btnShuffle= document.getElementById('btn-shuffle');
-const btnReset  = document.getElementById('btn-reset');
-const btnQuiz   = document.getElementById('btn-quiz');
-const btnDark   = document.getElementById('btn-dark');
+const btnShuffle = document.getElementById('btn-shuffle');
+const btnReset   = document.getElementById('btn-reset');
+const btnQuiz    = document.getElementById('btn-quiz');
+const btnDark    = document.getElementById('btn-dark');
 
-const quizTpl   = document.getElementById('quiz-tpl');
+const quizTpl = document.getElementById('quiz-tpl');
 
 let order = [];
 let currentIndex = 0;
 let currentCards = [];
-const slots = new WeakMap(); // card -> {parent, next, placeholder}
+const slots = new WeakMap();
 let animating = false;
 
 const el = (t,c)=>{const n=document.createElement(t); if(c) n.className=c; return n;};
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 
-/* ====== Boshlang‘ich holat ====== */
+/* ===== Boshlash ===== */
 initWordsUI();
 setMode('letters');
 
-/* ====== UI eventlar ====== */
+/* ===== UI events ===== */
 modeSel.addEventListener('change', ()=> setMode(modeSel.value));
 catSel.addEventListener('change', ()=> render());
-
 btnShuffle.addEventListener('click', ()=>{ order = shuffle(order); render(false); });
 btnReset.addEventListener('click', ()=>{ order = [...Array(currentCards.length).keys()]; render(false); });
-
 btnPrev.addEventListener('click', ()=> swapDelta(-1));
 btnNext.addEventListener('click', ()=> swapDelta(+1));
 overlay.addEventListener('click', e=>{ if(e.target===overlay) closeLarge(); });
@@ -332,32 +308,31 @@ window.addEventListener('keydown', e=>{
   if(e.key==='ArrowLeft')  swapDelta(-1);
   if(e.key==='ArrowRight') swapDelta(+1);
 });
-
 btnQuiz.addEventListener('click', startQuiz);
 btnDark.addEventListener('click', ()=>{
   document.body.classList.toggle('dark');
   btnDark.textContent = document.body.classList.contains('dark') ? '🌖 Light' : '🌗 Dark';
 });
 
-/* =================== FUNKSIYALAR =================== */
-function setMode(mode){
-  closeLarge(true); // darhol qaytarib qo‘yish (placeholder ham tozalanadi)
-  if(mode==='letters'){
-    catSel.style.display='none'; catLabel.style.display='none';
-    currentCards = LETTERS.map(x=>({type:'letter', ...x}));
-  }else{
-    catSel.style.display='inline-block'; catLabel.style.display='inline-block';
-    const cat = catSel.value || Object.keys(WORD_SETS)[0];
-    currentCards = WORD_SETS[cat].map(x=>({type:'word', ...x}));
-  }
-  order = [...Array(currentCards.length).keys()];
-  render(true);
-}
+/* ===== Funktsiyalar ===== */
 function initWordsUI(){
-  catSel.innerHTML = '';
+  catSel.innerHTML='';
   Object.keys(WORD_SETS).forEach(k=>{
     const o=document.createElement('option'); o.value=k; o.textContent=k; catSel.appendChild(o);
   });
+}
+function setMode(mode){
+  closeLarge(true);
+  if(mode==='letters'){
+    catSel.style.display='none'; catLabel.style.display='none';
+    currentCards = LETTERS.map(x=>({type:'letter', char:x.char, nameAr:x.nameAr}));
+  }else{
+    catSel.style.display='inline-block'; catLabel.style.display='inline-block';
+    const cat = catSel.value || Object.keys(WORD_SETS)[0];
+    currentCards = ensureFifty(WORD_SETS[cat]).map(x=>({type:'word', ...x}));
+  }
+  order = [...Array(currentCards.length).keys()];
+  render(true);
 }
 function render(resetOverlay=true){
   if(resetOverlay) closeLarge(true);
@@ -365,9 +340,11 @@ function render(resetOverlay=true){
   order.forEach((idx)=>{
     const d = currentCards[idx];
     const card=el('div','card');
-    const btn=el('button','card-btn'); btn.type='button'; btn.setAttribute('aria-label', ariaLabel(d));
-    const inner=el('div','inner');
+    const btn=el('button','card-btn'); btn.type='button';
+    if(d.type==='letter'){ btn.setAttribute('aria-label',`Harf ${d.char}`); }
+    else { btn.setAttribute('aria-label',`So‘z ${d.ar} — ${d.uz}`); }
 
+    const inner=el('div','inner');
     const front=el('div','face front');
     const txt=el('div', d.type==='letter' ? 'letter' : 'word');
     txt.textContent = d.type==='letter' ? d.char : d.ar;
@@ -375,13 +352,9 @@ function render(resetOverlay=true){
 
     const back=el('div','face back');
     const info=el('div','info');
-    const big=el('p','big'); big.textContent = d.ar;
-    const name=el('p','name'); name.textContent= d.uz;
-    if(d.type==='word'){
-      const badge=el('span','badge'); badge.textContent='So‘z';
-      info.appendChild(badge);
-    }
-    info.appendChild(big); info.appendChild(name);
+    const big=el('p','big'); big.textContent = d.type==='letter' ? getLetterName(d.char) : d.ar;
+    const name=el('p','name'); name.textContent= d.type==='letter' ? '' : d.uz;
+    info.appendChild(big); if(name.textContent) info.appendChild(name);
     back.appendChild(info);
 
     inner.appendChild(front); inner.appendChild(back);
@@ -390,216 +363,123 @@ function render(resetOverlay=true){
     btn.addEventListener('click', ()=> openOrSwap(card, order.indexOf(idx)));
   });
 }
-function ariaLabel(d){
-  return d.type==='letter' ? `Harf ${d.char}, ${d.uz}` : `So‘z ${d.ar}, ${d.uz}`;
+function getLetterName(ch){
+  const it = LETTERS.find(x=>x.char===ch);
+  return it ? it.nameAr : ch;
 }
 
-/* ---- Placeholder yordamchilari ---- */
+/* Placeholder */
 function createPlaceholder(fromCard){
   const ph = el('div','placeholder');
-  // real o‘lchamni olib, balandlikni moslaymiz
   const h = fromCard.getBoundingClientRect().height || parseFloat(getComputedStyle(fromCard).height);
-  ph.style.height = (h||parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-h'))) + 'px';
+  ph.style.height = (h || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-h'))) + 'px';
   return ph;
 }
 function parkCardWithPlaceholder(card){
-  // card o‘rniga placeholder qo‘yib, card’ni overlayga ko‘chiramiz
-  const parent = card.parentNode;
-  const next   = card.nextSibling;
+  const parent = card.parentNode, next = card.nextSibling;
   const ph = createPlaceholder(card);
-  parent.insertBefore(ph, next); // carddan oldin turgan joyga qo‘yiladi (card overlayga ketadi)
-  slots.set(card, {parent, next, placeholder: ph});
-  return {parent, next, placeholder: ph};
+  parent.insertBefore(ph, next);
+  slots.set(card, {parent,next,placeholder:ph});
+  return {parent,next,placeholder:ph};
 }
 function restoreCardFromPlaceholder(card){
-  const s = slots.get(card);
-  if(!s) return;
-  const {parent, next, placeholder} = s;
-  if(placeholder && placeholder.parentNode){
-    parent.insertBefore(card, placeholder);
-    placeholder.remove();
-  } else {
-    parent.insertBefore(card, next || null);
-  }
+  const s = slots.get(card); if(!s) return;
+  const {parent,next,placeholder} = s;
+  if(placeholder && placeholder.parentNode){ parent.insertBefore(card, placeholder); placeholder.remove(); }
+  else { parent.insertBefore(card, next||null); }
   slots.delete(card);
 }
 
-/* ---- Katta karta boshqaruvlari ---- */
-function openOrSwap(card, i){
+/* Open/swap/close */
+let animating=false;
+function openOrSwap(card,i){
   if(animating) return;
-  if(overlay.classList.contains('open')){
-    swapTo(i, card);
-  }else{
-    openLarge(card, i);
-  }
+  if(overlay.classList.contains('open')) swapTo(i,card);
+  else openLarge(card,i);
 }
-function openLarge(card, i){
+function openLarge(card,i){
   if(animating) return;
-  currentIndex = i;
-
-  // o‘ringa placeholder qoldirib, kartani overlayga ko‘chiramiz
+  currentIndex=i;
   parkCardWithPlaceholder(card);
-
-  overlay.classList.add('open');
-  overlay.setAttribute('aria-hidden','false');
-
-  card.classList.add('is-open','is-large','pop-in');
-  overlay.appendChild(card);
-
+  overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
+  card.classList.add('is-open','is-large','pop-in'); overlay.appendChild(card);
   document.body.style.overflow='hidden';
 }
 function closeLarge(immediate=false){
   if(!overlay.classList.contains('open')) return;
-  const card = overlay.querySelector('.card');
-  if(!card){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; return; }
-
+  const card = overlay.querySelector('.card'); if(!card){ overlay.classList.remove('open'); return; }
   if(immediate){
     card.classList.remove('is-open','is-large','pop-in','pop-out');
-    restoreCardFromPlaceholder(card);
-    overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow='';
+    restoreCardFromPlaceholder(card); overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow='';
     return;
   }
-
-  if(animating) return;
-  animating = true;
+  if(animating) return; animating=true;
   card.classList.remove('pop-in'); card.classList.add('pop-out');
   card.addEventListener('animationend', function handler(){
-    card.removeEventListener('animationend', handler);
+    card.removeEventListener('animationend',handler);
     card.classList.remove('is-open','is-large','pop-out');
-    restoreCardFromPlaceholder(card);
-    overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
-    document.body.style.overflow='';
-    animating = false;
+    restoreCardFromPlaceholder(card); overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow='';
+    animating=false;
   });
 }
-
-/* ---- Swap: eski karta yopilib, yangi karta ochiladi ---- */
 function swapDelta(delta){
   if(!overlay.classList.contains('open')) return;
-  const nextIndex = (currentIndex + delta + order.length) % order.length;
-  const target = grid.querySelectorAll('.card, .placeholder')[nextIndex*1] // gridda placeholder ham bor
-    ? findCardAtGridIndex(nextIndex)
-    : grid.children[nextIndex];
-  if(target) swapTo(nextIndex, target);
+  const nextIndex=(currentIndex+delta+order.length)%order.length;
+  const target = grid.children[nextIndex];
+  if(target) swapTo(nextIndex,target);
 }
-function findCardAtGridIndex(index){
-  // gridda placeholderlar bo‘lishi mumkin; shu indeksdagi asl kartani topamiz
-  let seen=-1;
-  for(const node of grid.childNodes){
-    if(!(node instanceof HTMLElement)) continue;
-    if(!node.classList.contains('card') && !node.classList.contains('placeholder')) continue;
-    seen++;
-    if(seen===index){
-      // agar placeholder bo‘lsa, uning yonidagi asl card overlayda bo‘lishi mumkin
-      if(node.classList.contains('card')) return node;
-      // placeholderga mos keluvchi card overlayda
-      const overlayCard = overlay.querySelector('.card');
-      return overlayCard || null;
-    }
-  }
-  return null;
-}
-function swapTo(newIndex, newCard){
-  if(animating) return;
-  animating = true;
-
+function swapTo(newIndex,newCard){
+  if(animating) return; animating=true;
   const oldCard = overlay.querySelector('.card');
-
-  // 1) Eski kartani animatsiya bilan yopamiz va joyiga qaytaramiz
   if(oldCard){
-    oldCard.classList.remove('pop-in');
-    oldCard.classList.add('pop-out');
+    oldCard.classList.remove('pop-in'); oldCard.classList.add('pop-out');
     oldCard.addEventListener('animationend', function onOut(){
-      oldCard.removeEventListener('animationend', onOut);
+      oldCard.removeEventListener('animationend',onOut);
       oldCard.classList.remove('is-open','is-large','pop-out');
       restoreCardFromPlaceholder(oldCard);
 
-      // 2) Yangi karta uchun placeholder yaratib, overlayga olib kelamiz
-      currentIndex = newIndex;
+      currentIndex=newIndex;
       parkCardWithPlaceholder(newCard);
-      newCard.classList.add('is-open','is-large','pop-in');
-      overlay.appendChild(newCard);
-
-      newCard.addEventListener('animationend', function onIn(){
-        newCard.removeEventListener('animationend', onIn);
-        animating = false;
-      });
+      newCard.classList.add('is-open','is-large','pop-in'); overlay.appendChild(newCard);
+      newCard.addEventListener('animationend', function onIn(){ newCard.removeEventListener('animationend',onIn); animating=false; });
     });
   }else{
-    // Eski karta yo‘q — oddiy ochish
-    openLarge(newCard, newIndex);
-    animating = false;
+    openLarge(newCard,newIndex); animating=false;
   }
 }
 
-/* ---- Quiz ---- */
+/* Quiz: Harf rejimida arabcha nomlarni tekshiradi; So‘zlar rejimida tarjimani. */
 function startQuiz(){
   if(animating) return;
-  closeLarge(true);
-  overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
-  document.body.style.overflow='hidden';
-
-  const frag = quizTpl.content.cloneNode(true);
-  const wrap = frag.querySelector('.quiz-wrap');
-  overlay.appendChild(wrap);
-
-  let score=0, total=0;
-  nextQ();
-
+  closeLarge(true); overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+  const frag = quizTpl.content.cloneNode(true), wrap = frag.querySelector('.quiz-wrap'); overlay.appendChild(wrap);
+  let score=0,total=0; nextQ();
   function pool(){
-    if(modeSel.value==='letters') return LETTERS.map(x=>({q:x.char, a:x.uz}));
-    const items = getCurrentWordSet();
-    return items.map(x=>({q:x.ar, a:x.uz}));
-  }
-  function getCurrentWordSet(){
+    if(modeSel.value==='letters') return LETTERS.map(x=>({q:x.char, a:x.nameAr}));
     const cat = catSel.value || Object.keys(WORD_SETS)[0];
-    return WORD_SETS[cat];
+    return ensureFifty(WORD_SETS[cat]).map(x=>({q:x.ar, a:x.uz}));
   }
   function nextQ(){
-    const P = pool();
-    const it = P[Math.floor(Math.random()*P.length)];
-    const opts = new Set([it.a]);
-    while(opts.size<4){ opts.add(P[Math.floor(Math.random()*P.length)].a); }
-    const mix = Array.from(opts); shuffle(mix);
-
-    wrap.querySelector('#q-char').textContent = it.q;
-    const box = wrap.querySelector('#q-opts'); box.innerHTML='';
-    mix.forEach(name=>{
-      const b=document.createElement('button'); b.textContent=name;
-      b.addEventListener('click', ()=>{
-        total++;
-        if(name===it.a){ score++; b.classList.add('good'); } else { b.classList.add('bad'); }
-        wrap.querySelectorAll('#q-opts button').forEach(x=>x.disabled=true);
-        upd();
-      });
+    const P=pool(); const it=P[Math.floor(Math.random()*P.length)];
+    const opts=new Set([it.a]); while(opts.size<4){ opts.add(P[Math.floor(Math.random()*P.length)].a); }
+    const mix=[...opts]; shuffle(mix);
+    wrap.querySelector('#q-char').textContent=it.q; const box=wrap.querySelector('#q-opts'); box.innerHTML='';
+    mix.forEach(name=>{ const b=document.createElement('button'); b.textContent=name;
+      b.onclick=()=>{ total++; if(name===it.a){score++; b.classList.add('good');} else b.classList.add('bad');
+        box.querySelectorAll('button').forEach(x=>x.disabled=true); upd(); };
       box.appendChild(b);
     });
-    wrap.querySelector('#q-next').onclick = nextQ;
-    upd();
+    wrap.querySelector('#q-next').onclick=nextQ; upd();
   }
-  function upd(){ wrap.querySelector('#q-score').textContent = `${score}/${total}`; }
-
-  // yopish
-  overlay.addEventListener('click', onOv, {once:true});
-  window.addEventListener('keydown', onEsc);
+  function upd(){ wrap.querySelector('#q-score').textContent=`${score}/${total}`; }
+  overlay.addEventListener('click', onOv, {once:true}); window.addEventListener('keydown', onEsc);
   function onOv(e){ if(e.target===overlay){ end(); } else { overlay.addEventListener('click', onOv, {once:true}); } }
   function onEsc(e){ if(e.key==='Escape'){ end(); } }
-  function end(){
-    overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
-    document.body.style.overflow=''; wrap.remove(); window.removeEventListener('keydown', onEsc);
-  }
+  function end(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; wrap.remove(); window.removeEventListener('keydown', onEsc); }
 }
 
-/* ====== UI yordamchilari ====== */
-function openLargeFromGridEl(cardEl){
-  const idx = [...grid.children].indexOf(cardEl);
-  if(idx>=0) openOrSwap(cardEl, idx);
-}
-function getCurrentCards(){
-  return (modeSel.value==='letters')
-    ? LETTERS.map(x=>({type:'letter', ...x}))
-    : (WORD_SETS[catSel.value || Object.keys(WORD_SETS)[0]].map(x=>({type:'word', ...x})));
-}
+/* Helpers */
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
 </script>
 </body>
 </html>
