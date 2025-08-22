@@ -210,7 +210,7 @@ const TTS = {
   femaleHints:["Mona","Zainab","Zeinab","Laila","Layla","Reem","Hoda","Salma","Aisha","Noura","Amira"],
   maleHints:["Maged","Tariq","Tarik","Omar","Mehdi","Ali","Ahmed","Hassan","Yousef","Yusuf","Ziad"],
   pickVoice(){
-    const voices = window.speechSynthesis?.getVoices?.() || [];
+    const voices = window.speechSynthesis?.getVoices?.() || [];(
     const arVoices = voices.filter(v => /^ar(-|$)/i.test(v.lang) || /Arabic/i.test(v.name));
     if(!arVoices.length){ this.voice=null; return; }
     if(this.gender==='female'){
@@ -376,36 +376,6 @@ function speakCurrent(){
   const item = currentCards[currentIndex]; if(!item) return;
   const text = (item.type==='letter') ? getLetterName(item.char) : item.ar;
   TTS.speak(text);
-}
-
-/* Quiz (o‘zgarishsiz) */
-function startQuiz(){
-  if(animating) return;
-  closeLarge(true); overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
-  const frag = quizTpl.content.cloneNode(true), wrap = frag.querySelector('.quiz-wrap'); overlay.appendChild(wrap);
-  let score=0,total=0; nextQ();
-  function pool(){
-    if(modeSel.value==='letters') return LETTERS.map(x=>({q:x.char, a:x.nameAr}));
-    const cat = catSel.value || Object.keys(WORD_SETS)[0];
-    return ensureFifty(WORD_SETS[cat]).map(x=>({q:x.ar, a:x.uz}));
-  }
-  function nextQ(){
-    const P=pool(); const it=P[Math.floor(Math.random()*P.length)];
-    const opts=new Set([it.a]); while(opts.size<4){ opts.add(P[Math.floor(Math.random()*P.length)].a); }
-    const mix=[...opts]; shuffle(mix);
-    wrap.querySelector('#q-char').textContent=it.q; const box=wrap.querySelector('#q-opts'); box.innerHTML='';
-    mix.forEach(name=>{ const b=document.createElement('button'); b.textContent=name;
-      b.onclick=()=>{ total++; if(name===it.a){score++; b.classList.add('good');} else b.classList.add('bad');
-        box.querySelectorAll('button').forEach(x=>x.disabled=true); upd(); };
-      box.appendChild(b);
-    });
-    wrap.querySelector('#q-next').onclick=nextQ; upd();
-  }
-  function upd(){ wrap.querySelector('#q-score').textContent=`${score}/${total}`; }
-  overlay.addEventListener('click', onOv, {once:true}); window.addEventListener('keydown', onEsc);
-  function onOv(e){ if(e.target===overlay){ end(); } else { overlay.addEventListener('click', onOv, {once:true}); } }
-  function onEsc(e){ if(e.key==='Escape'){ end(); } }
-  function end(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; wrap.remove(); window.removeEventListener('keydown', onEsc); }
 }
 
 /* helpers */
