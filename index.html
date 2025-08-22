@@ -8,6 +8,7 @@
 :root{
   --bg:#f4f8ff; --panel:#eaf2ff; --card:#ffffff; --ink:#16324a;
   --accent:#ffd166; --btn:#0aa2ff; --btn-ink:#fff;
+  --card-h:180px; /* kartochka balandligi va placeholder uchun */
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -49,8 +50,15 @@ select{
 /* Kartochka ichida LTR, arabcha matnni alohida RTL qilamiz */
 .card, .card * { direction: ltr; }
 
+/* Placeholder — karta o‘rnini ushlab turadi */
+.placeholder{
+  height:var(--card-h);
+  border-radius:18px;
+  visibility:hidden;  /* joyni egallaydi, ko‘rinmaydi */
+}
+
 /* ---------- Card (flip) ---------- */
-.card{ perspective:1000px; height:180px; }
+.card{ perspective:1000px; height:var(--card-h); }
 .card-btn{ position:relative; width:100%; height:100%; border:0; background:transparent; padding:0; cursor:pointer; }
 .inner{
   position:absolute; inset:0; border-radius:18px; background:var(--card);
@@ -90,7 +98,7 @@ select{
 .card:nth-child(6n+1) .front{background: radial-gradient(circle at 30% -10%, #e3f7ff, #e3f7ff 30%, #fff 30%);}
 .card:nth-child(6n+2) .front{background: radial-gradient(circle at 70% -10%, #ffe9f3, #ffe9f3 30%, #fff 30%);}
 .card:nth-child(6n+3) .front{background: radial-gradient(circle at 20% -10%, #fff3d9, #fff3d9 30%, #fff 30%);}
-.card:nth-child(6n+4) .front{background: radial-gradient(circle at 70% -10%, #ecffe9, #ecffe9 30%, #fff 30%);}
+.card:nth-child(6n+4) .front{background: radial-gradient(circle at 70% -10%, #ecffe9, #ecffe9 30% , #fff 30%);}
 .card:nth-child(6n+5) .front{background: radial-gradient(circle at 30% -10%, #f1e9ff, #f1e9ff 30%, #fff 30%);}
 .card:nth-child(6n+6) .front{background: radial-gradient(circle at 70% -10%, #ffe9e9, #ffe9e9 30%, #fff 30%);}
 
@@ -222,7 +230,6 @@ select{
 
 <script>
 /* =================== MA'LUMOTLAR =================== */
-/* Harflar (translit yo‘q) */
 const LETTERS = [
   L("ا","Alif","ألف"), L("ب","Bo","باء"), L("ت","To","تاء"), L("ث","Sa","ثاء"),
   L("ج","Jim","جيم"), L("ح","Ho","حاء"), L("خ","Xo","خاء"), L("د","Dal","دال"),
@@ -234,7 +241,6 @@ const LETTERS = [
 ];
 function L(char, uz, ar){ return {char, uz, ar}; }
 
-/* So‘zlar to‘plamlari — kengaytirilgan */
 const WORD_SETS = {
   "Hayvonlar": [
     W("أَسَد","Sher"), W("قِطَّة","Mushuk"), W("كَلْب","It"), W("حِصَان","Ot"), 
@@ -296,14 +302,14 @@ const btnDark   = document.getElementById('btn-dark');
 
 const quizTpl   = document.getElementById('quiz-tpl');
 
-let order = [];           // indexlar
-let currentIndex = 0;     // overlayda qaysi karta
-let currentCards = [];    // griddagi obyektlar ro‘yxati
-const slots = new WeakMap();
+let order = [];
+let currentIndex = 0;
+let currentCards = [];
+const slots = new WeakMap(); // card -> {parent, next, placeholder}
+let animating = false;
+
 const el = (t,c)=>{const n=document.createElement(t); if(c) n.className=c; return n;};
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
-
-let animating = false; // bir vaqtning o'zida faqat bitta almashtirish
 
 /* ====== Boshlang‘ich holat ====== */
 initWordsUI();
@@ -323,7 +329,7 @@ ovClose.addEventListener('click', closeLarge);
 window.addEventListener('keydown', e=>{
   if(e.key==='Escape') closeLarge();
   if(!overlay.classList.contains('open')) return;
-  if(e.key==='ArrowLeft')  swapDelta(-1); // RTL: chap = oldingi
+  if(e.key==='ArrowLeft')  swapDelta(-1);
   if(e.key==='ArrowRight') swapDelta(+1);
 });
 
@@ -335,6 +341,7 @@ btnDark.addEventListener('click', ()=>{
 
 /* =================== FUNKSIYALAR =================== */
 function setMode(mode){
+  closeLarge(true); // darhol qaytarib qo‘yish (placeholder ham tozalanadi)
   if(mode==='letters'){
     catSel.style.display='none'; catLabel.style.display='none';
     currentCards = LETTERS.map(x=>({type:'letter', ...x}));
@@ -387,11 +394,40 @@ function ariaLabel(d){
   return d.type==='letter' ? `Harf ${d.char}, ${d.uz}` : `So‘z ${d.ar}, ${d.uz}`;
 }
 
+/* ---- Placeholder yordamchilari ---- */
+function createPlaceholder(fromCard){
+  const ph = el('div','placeholder');
+  // real o‘lchamni olib, balandlikni moslaymiz
+  const h = fromCard.getBoundingClientRect().height || parseFloat(getComputedStyle(fromCard).height);
+  ph.style.height = (h||parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-h'))) + 'px';
+  return ph;
+}
+function parkCardWithPlaceholder(card){
+  // card o‘rniga placeholder qo‘yib, card’ni overlayga ko‘chiramiz
+  const parent = card.parentNode;
+  const next   = card.nextSibling;
+  const ph = createPlaceholder(card);
+  parent.insertBefore(ph, next); // carddan oldin turgan joyga qo‘yiladi (card overlayga ketadi)
+  slots.set(card, {parent, next, placeholder: ph});
+  return {parent, next, placeholder: ph};
+}
+function restoreCardFromPlaceholder(card){
+  const s = slots.get(card);
+  if(!s) return;
+  const {parent, next, placeholder} = s;
+  if(placeholder && placeholder.parentNode){
+    parent.insertBefore(card, placeholder);
+    placeholder.remove();
+  } else {
+    parent.insertBefore(card, next || null);
+  }
+  slots.delete(card);
+}
+
 /* ---- Katta karta boshqaruvlari ---- */
 function openOrSwap(card, i){
   if(animating) return;
   if(overlay.classList.contains('open')){
-    // Overlay allaqachon ochiq: avvalgisini yopib, yangisini ochamiz
     swapTo(i, card);
   }else{
     openLarge(card, i);
@@ -400,8 +436,9 @@ function openOrSwap(card, i){
 function openLarge(card, i){
   if(animating) return;
   currentIndex = i;
-  const slot = {parent:card.parentNode, next:card.nextSibling};
-  slots.set(card, slot);
+
+  // o‘ringa placeholder qoldirib, kartani overlayga ko‘chiramiz
+  parkCardWithPlaceholder(card);
 
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden','false');
@@ -414,14 +451,12 @@ function openLarge(card, i){
 function closeLarge(immediate=false){
   if(!overlay.classList.contains('open')) return;
   const card = overlay.querySelector('.card');
-  if(!card) { overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; return; }
+  if(!card){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; return; }
 
   if(immediate){
     card.classList.remove('is-open','is-large','pop-in','pop-out');
-    const slot=slots.get(card);
-    if(slot && slot.parent) slot.parent.insertBefore(card, slot.next||null);
+    restoreCardFromPlaceholder(card);
     overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow='';
-    slots.delete(card);
     return;
   }
 
@@ -431,21 +466,38 @@ function closeLarge(immediate=false){
   card.addEventListener('animationend', function handler(){
     card.removeEventListener('animationend', handler);
     card.classList.remove('is-open','is-large','pop-out');
-    const slot=slots.get(card);
-    if(slot && slot.parent){ slot.parent.insertBefore(card, slot.next||null); }
+    restoreCardFromPlaceholder(card);
     overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
     document.body.style.overflow='';
-    slots.delete(card);
     animating = false;
   });
 }
 
-/* ---- Swap: oldingi yopilib, keyingisi ochiladi ---- */
+/* ---- Swap: eski karta yopilib, yangi karta ochiladi ---- */
 function swapDelta(delta){
   if(!overlay.classList.contains('open')) return;
   const nextIndex = (currentIndex + delta + order.length) % order.length;
-  const target = grid.children[nextIndex];
-  swapTo(nextIndex, target);
+  const target = grid.querySelectorAll('.card, .placeholder')[nextIndex*1] // gridda placeholder ham bor
+    ? findCardAtGridIndex(nextIndex)
+    : grid.children[nextIndex];
+  if(target) swapTo(nextIndex, target);
+}
+function findCardAtGridIndex(index){
+  // gridda placeholderlar bo‘lishi mumkin; shu indeksdagi asl kartani topamiz
+  let seen=-1;
+  for(const node of grid.childNodes){
+    if(!(node instanceof HTMLElement)) continue;
+    if(!node.classList.contains('card') && !node.classList.contains('placeholder')) continue;
+    seen++;
+    if(seen===index){
+      // agar placeholder bo‘lsa, uning yonidagi asl card overlayda bo‘lishi mumkin
+      if(node.classList.contains('card')) return node;
+      // placeholderga mos keluvchi card overlayda
+      const overlayCard = overlay.querySelector('.card');
+      return overlayCard || null;
+    }
+  }
+  return null;
 }
 function swapTo(newIndex, newCard){
   if(animating) return;
@@ -453,25 +505,21 @@ function swapTo(newIndex, newCard){
 
   const oldCard = overlay.querySelector('.card');
 
-  // 1) Eski kartani animatsiya bilan yopamiz
+  // 1) Eski kartani animatsiya bilan yopamiz va joyiga qaytaramiz
   if(oldCard){
     oldCard.classList.remove('pop-in');
     oldCard.classList.add('pop-out');
     oldCard.addEventListener('animationend', function onOut(){
       oldCard.removeEventListener('animationend', onOut);
-      // eski joyiga qaytarish
-      const slot=slots.get(oldCard);
-      if(slot && slot.parent){ slot.parent.insertBefore(oldCard, slot.next||null); }
-      slots.delete(oldCard);
+      oldCard.classList.remove('is-open','is-large','pop-out');
+      restoreCardFromPlaceholder(oldCard);
 
-      // 2) Yangi kartani overlayga olib kelib animatsiya bilan ochamiz
+      // 2) Yangi karta uchun placeholder yaratib, overlayga olib kelamiz
       currentIndex = newIndex;
-      const slotNew = {parent:newCard.parentNode, next:newCard.nextSibling};
-      slots.set(newCard, slotNew);
+      parkCardWithPlaceholder(newCard);
       newCard.classList.add('is-open','is-large','pop-in');
       overlay.appendChild(newCard);
 
-      // animatsiya tugaganda flagni o‘chirib qo‘yamiz
       newCard.addEventListener('animationend', function onIn(){
         newCard.removeEventListener('animationend', onIn);
         animating = false;
@@ -487,7 +535,7 @@ function swapTo(newIndex, newCard){
 /* ---- Quiz ---- */
 function startQuiz(){
   if(animating) return;
-  closeLarge(true); // overlay bo‘lsa darhol yopamiz
+  closeLarge(true);
   overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
 
@@ -500,7 +548,7 @@ function startQuiz(){
 
   function pool(){
     if(modeSel.value==='letters') return LETTERS.map(x=>({q:x.char, a:x.uz}));
-    const items = getCurrentWordSet(); // so‘zlar
+    const items = getCurrentWordSet();
     return items.map(x=>({q:x.ar, a:x.uz}));
   }
   function getCurrentWordSet(){
@@ -542,12 +590,12 @@ function startQuiz(){
   }
 }
 
-/* ====== yordamchi ====== */
+/* ====== UI yordamchilari ====== */
 function openLargeFromGridEl(cardEl){
   const idx = [...grid.children].indexOf(cardEl);
   if(idx>=0) openOrSwap(cardEl, idx);
 }
-function getModeCards(){
+function getCurrentCards(){
   return (modeSel.value==='letters')
     ? LETTERS.map(x=>({type:'letter', ...x}))
     : (WORD_SETS[catSel.value || Object.keys(WORD_SETS)[0]].map(x=>({type:'word', ...x})));
