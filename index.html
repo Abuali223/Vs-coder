@@ -123,27 +123,6 @@ select{padding:8px 10px;border-radius:10px;border:1px solid #cfe3ff;background:#
     </div>
   </div>
 
-  <!-- Quiz (o‘zgarmagan) -->
-  <template id="quiz-tpl">
-    <div class="quiz">
-      <style>
-        .quiz-wrap{background:var(--card);border-radius:18px;padding:18px;max-width:560px;width:min(92vw,560px);
-                   box-shadow:0 18px 40px rgba(0,0,0,.25);border:1px solid #dfe8f5;text-align:center}
-        .quiz .harf{font-family:"Noto Kufi Arabic","Amiri",serif;font-size:80px;margin:0 0 10px;direction:rtl}
-        .quiz .opts{display:grid;gap:10px;margin-top:6px}
-        .quiz .opts button{padding:10px 12px;border-radius:12px;border:1px solid #cfe3ff;cursor:pointer;background:#eaf4ff;font-weight:700}
-        .quiz .opts button.good{background:#d9f9d9;border-color:#7fce7f}
-        .quiz .opts button.bad{background:#ffd6d6;border-color:#f28b8b}
-        .quiz .foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
-        .quiz .score{font-weight:800}
-      </style>
-      <div class="quiz-wrap">
-        <div class="harf" id="q-char"></div>
-        <div class="opts" id="q-opts"></div>
-        <div class="foot"><div class="score" id="q-score">0/0</div><button class="btn" id="q-next">Keyingi</button></div>
-      </div>
-    </div>
-  </template>
 
 <script>
 /* ========== HARFLAR (faqat arabcha nom ko‘rsatiladi) ========== */
