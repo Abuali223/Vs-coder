@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Arab Alifbosi — Kartochkalar</title>
+<title>Arab Alifbosi — Kartochkalar + So‘zlar</title>
 <style>
 :root{
   --bg:#f4f8ff; --panel:#eaf2ff; --card:#ffffff; --ink:#16324a;
@@ -24,8 +24,9 @@ body{
 
 .toolbar{
   max-width:1100px; margin:10px auto 0; padding:0 16px;
-  display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;
+  display:flex; gap:8px; justify-content:space-between; align-items:center; flex-wrap:wrap;
 }
+.left, .right{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
 .btn{
   background:var(--btn); color:var(--btn-ink); border:none; border-radius:10px; padding:8px 12px; cursor:pointer;
   font-weight:700; box-shadow:0 6px 16px rgba(10,162,255,.25);
@@ -33,6 +34,9 @@ body{
 .btn.secondary{ background:#e9f4ff; color:#0a3760; box-shadow:none; border:1px solid #cfe3ff; }
 .btn.warn{ background:#ffd166; color:#4a2a00; box-shadow:0 6px 16px rgba(255,209,102,.25); }
 .btn:active{transform:translateY(1px)}
+select{
+  padding:8px 10px; border-radius:10px; border:1px solid #cfe3ff; background:#fff;
+}
 
 /* ---------- Grid (RTL) ---------- */
 .grid{
@@ -60,11 +64,12 @@ body{
 
 .face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:18px; display:flex; align-items:center; justify-content:center; padding:14px; }
 .front{ background: radial-gradient(circle at 30% -10%, #eaf3ff, #eaf3ff 30%, #ffffff 30%); }
-.letter{
+.letter, .word{
   font-family:"Noto Kufi Arabic","Amiri",serif;
-  font-size: clamp(46px, 9vw, 64px);
-  line-height:1; color:#0a2450;
+  font-size: clamp(34px, 7.6vw, 48px);
+  line-height:1.1; color:#0a2450;
   text-shadow: 0 2px 0 #fff, 0 10px 24px rgba(10,36,80,.18);
+  text-align:center;
 }
 .back{
   transform: rotateY(180deg);
@@ -74,8 +79,12 @@ body{
     radial-gradient(100px 60px at 0% 100%, #cfe9ff, transparent 70%);
 }
 .info{ text-align:center; }
-.info .big{ font-family:"Noto Kufi Arabic","Amiri",serif; font-size:40px; margin:0 0 6px; direction:rtl; }
+.info .big{
+  font-family:"Noto Kufi Arabic","Amiri",serif; margin:0 0 6px; direction:rtl;
+  font-size:40px;
+}
 .info .name{ margin:2px 0 10px; font-weight:800; color:#274a70; font-size:20px; }
+.badge{display:inline-block; padding:4px 10px; border-radius:999px; background:#eef5ff; border:1px dashed #bcd6f7; color:#0a3a66; font-weight:700}
 
 /* rangli frontlar */
 .card:nth-child(6n+1) .front{background: radial-gradient(circle at 30% -10%, #e3f7ff, #e3f7ff 30%, #fff 30%);}
@@ -154,14 +163,27 @@ body{
   </header>
 
   <div class="toolbar">
-    <button id="btn-shuffle" class="btn">🔀 Aralashtirish</button>
-    <button id="btn-reset"   class="btn secondary">↩️ Qaytarish</button>
-    <button id="btn-quiz"    class="btn warn">🧠 Quiz</button>
-    <button id="btn-dark"    class="btn secondary">🌗 Dark</button>
+    <div class="left">
+      <label for="mode">Rejim:</label>
+      <select id="mode">
+        <option value="letters">Harf</option>
+        <option value="words">So‘zlar</option>
+      </select>
+
+      <label for="category" id="cat-label" style="display:none;">Mavzu:</label>
+      <select id="category" style="display:none;"></select>
+    </div>
+
+    <div class="right">
+      <button id="btn-shuffle" class="btn">🔀 Aralashtirish</button>
+      <button id="btn-reset"   class="btn secondary">↩️ Qaytarish</button>
+      <button id="btn-quiz"    class="btn warn">🧠 Quiz</button>
+      <button id="btn-dark"    class="btn secondary">🌗 Dark</button>
+    </div>
   </div>
 
   <main>
-    <section id="letters" class="grid" aria-live="polite"></section>
+    <section id="grid" class="grid" aria-live="polite"></section>
   </main>
 
   <!-- Overlay (kattalashgan karta) -->
@@ -173,11 +195,11 @@ body{
     </div>
   </div>
 
-  <!-- Quiz modal (oddiy, shu overlaydan foydalanamiz) -->
+  <!-- Quiz modal (overlaydan foydalanamiz) -->
   <template id="quiz-tpl">
     <div class="quiz">
       <style>
-        .quiz-wrap{background:var(--card);border-radius:18px;padding:18px;max-width:520px;width:min(92vw,520px);
+        .quiz-wrap{background:var(--card);border-radius:18px;padding:18px;max-width:560px;width:min(92vw,560px);
                    box-shadow:0 18px 40px rgba(0,0,0,.25);border:1px solid #dfe8f5;text-align:center}
         .quiz .harf{font-family:"Noto Kufi Arabic","Amiri",serif;font-size:80px;margin:0 0 10px}
         .quiz .opts{display:grid;gap:10px;margin-top:6px}
@@ -199,68 +221,164 @@ body{
   </template>
 
 <script>
-/* ===== Ma’lumotlar (transliteratsiya yo‘q) ===== */
-const DATA = [
-  H("ا","Alif","ألف"), H("ب","Bo","باء"), H("ت","To","تاء"), H("ث","Sa","ثاء"),
-  H("ج","Jim","جيم"), H("ح","Ho","حاء"), H("خ","Xo","خاء"), H("د","Dal","دال"),
-  H("ذ","Zal","ذال"), H("ر","Ro","راء"), H("ز","Zo","زاي"), H("س","Sin","سين"),
-  H("ش","Shin","شين"), H("ص","Sod","صاد"), H("ض","Dod","ضاد"), H("ط","To‘","طاء"),
-  H("ظ","Zo‘","ظاء"), H("ع","Ayn","عين"), H("غ","G‘ayn","غين"), H("ف","Fo","فاء"),
-  H("ق","Qof","قاف"), H("ك","Kaf","كاف"), H("ل","Lam","لام"), H("م","Mim","ميم"),
-  H("ن","Nun","نون"), H("ه","Ha","هاء"), H("و","Vav","واو"), H("ي","Ya","ياء"),
+/* =================== MA'LUMOTLAR =================== */
+/* Harflar (translit yo‘q) */
+const LETTERS = [
+  L("ا","Alif","ألف"), L("ب","Bo","باء"), L("ت","To","تاء"), L("ث","Sa","ثاء"),
+  L("ج","Jim","جيم"), L("ح","Ho","حاء"), L("خ","Xo","خاء"), L("د","Dal","دال"),
+  L("ذ","Zal","ذال"), L("ر","Ro","راء"), L("ز","Zo","زاي"), L("س","Sin","سين"),
+  L("ش","Shin","شين"), L("ص","Sod","صاد"), L("ض","Dod","ضاد"), L("ط","To‘","طاء"),
+  L("ظ","Zo‘","ظاء"), L("ع","Ayn","عين"), L("غ","G‘ayn","غين"), L("ف","Fo","فاء"),
+  L("ق","Qof","قاف"), L("ك","Kaf","كاف"), L("ل","Lam","لام"), L("م","Mim","ميم"),
+  L("ن","Nun","نون"), L("ه","Ha","هاء"), L("و","Vav","واو"), L("ي","Ya","ياء"),
 ];
-function H(char, uz, ar){ return {char, uz, ar}; }
+function L(char, uz, ar){ return {char, uz, ar}; }
 
-/* ===== DOM ===== */
-const root = document.getElementById('letters');
-const overlay = document.getElementById('overlay');
-const ovClose = document.getElementById('ov-close');
-const btnPrev = document.getElementById('prev');
-const btnNext = document.getElementById('next');
-const btnShuffle = document.getElementById('btn-shuffle');
-const btnReset   = document.getElementById('btn-reset');
-const btnQuiz    = document.getElementById('btn-quiz');
-const btnDark    = document.getElementById('btn-dark');
-const quizTpl    = document.getElementById('quiz-tpl');
+/* So‘zlar to‘plamlari */
+const WORD_SETS = {
+  "Hayvonlar": [
+    W("أَسَد","Sher"), W("قِطَّة","Mushuk"), W("كَلْب","It"), W("حِصَان","Ot"), W("طَائِر","Qush"), W("سَمَك","Baliq")
+  ],
+  "Mevalar": [
+    W("تُفَّاح","Olma"), W("مَوْز","Banan"), W("عِنَب","Uzum"), W("بُرْتُقَال","Apelsin"),
+    W("لَيْمُون","Limon"), W("فِرَاوِلَة","Qulupnay")
+  ],
+  "Ranglar": [
+    W("أَحْمَر","Qizil"), W("أَزْرَق","Ko‘k"), W("أَخْضَر","Yashil"), W("أَصْفَر","Sariq"),
+    W("أَسْوَد","Qora"), W("أَبْيَض","Oq")
+  ],
+  "Oila": [
+    W("أَب","Ota"), W("أُمّ","Ona"), W("أَخ","Aka/uka"), W("أُخْت","Opa/singil"), W("جَدّ","Bobo"), W("جَدَّة","Buvi")
+  ],
+  "Sinfxona": [
+    W("كِتَاب","Kitob"), W("قَلَم","Ruchka"), W("دَفْتَر","Daftar"), W("كُرْسِيّ","Stul"),
+    W("طَاوِلَة","Stol"), W("مُعَلِّم","O‘qituvchi")
+  ],
+  "Transport": [
+    W("سَيَّارَة","Mashina"), W("دَرَّاجَة","Velosiped"), W("حَافِلَة","Avtobus"),
+    W("قِطَار","Poyezd"), W("طَائِرَة","Samolyot"), W("قَارِب","Qayiq")
+  ],
+  "Tabiat": [
+    W("شَمْس","Quyosh"), W("قَمَر","Oy"), W("نَجْمَة","Yulduz"), W("شَجَرَة","Daraxt"),
+    W("زَهْرَة","Gul"), W("بَحْر","Dengiz")
+  ],
+  "Taomlar": [
+    W("خُبْز","Non"), W("مَاء","Suv"), W("حَلِيب","Sut"), W("أَرُزّ","Guruch"),
+    W("لَحْم","Go‘sht"), W("جُبْن","Pishloq")
+  ]
+};
+function W(ar, uz){ return {ar, uz}; }
 
-let order = [...Array(DATA.length).keys()]; // 0..27
-let currentIndex = 0;
-const slots = new WeakMap(); // card -> {parent, next}
+/* =================== DOM & HOLAT =================== */
+const grid      = document.getElementById('grid');
+const overlay   = document.getElementById('overlay');
+const ovClose   = document.getElementById('ov-close');
+const btnPrev   = document.getElementById('prev');
+const btnNext   = document.getElementById('next');
 
-/* ===== Helperlar ===== */
+const modeSel   = document.getElementById('mode');
+const catSel    = document.getElementById('category');
+const catLabel  = document.getElementById('cat-label');
+
+const btnShuffle= document.getElementById('btn-shuffle');
+const btnReset  = document.getElementById('btn-reset');
+const btnQuiz   = document.getElementById('btn-quiz');
+const btnDark   = document.getElementById('btn-dark');
+
+const quizTpl   = document.getElementById('quiz-tpl');
+
+let order = [];           // indexlar
+let currentIndex = 0;     // overlayda qaysi karta
+let currentCards = [];    // hozir gridda ko‘rsatilayotgan obyektlar ro‘yxati
+const slots = new WeakMap();
 const el = (t,c)=>{const n=document.createElement(t); if(c) n.className=c; return n;};
-const by = i => DATA[order[i]];
-function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 
-/* ===== Grid ===== */
-render();
-function render(){
-  root.innerHTML='';
-  order.forEach((_,i)=>{
-    const d = by(i);
+/* ====== Boshlang‘ich holat ====== */
+initWordsUI();
+setMode('letters');
+
+/* ====== UI eventlar ====== */
+modeSel.addEventListener('change', ()=> setMode(modeSel.value));
+catSel.addEventListener('change', ()=> render());
+
+btnShuffle.addEventListener('click', ()=>{ order = shuffle(order); render(false); });
+btnReset.addEventListener('click', ()=>{ order = [...Array(currentCards.length).keys()]; render(false); });
+
+btnPrev.addEventListener('click', prev);
+btnNext.addEventListener('click', next);
+overlay.addEventListener('click', e=>{ if(e.target===overlay) closeLarge(); });
+ovClose.addEventListener('click', closeLarge);
+window.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeLarge();
+  if(!overlay.classList.contains('open')) return;
+  if(e.key==='ArrowLeft') prev();
+  if(e.key==='ArrowRight') next();
+});
+
+btnQuiz.addEventListener('click', startQuiz);
+btnDark.addEventListener('click', ()=>{
+  document.body.classList.toggle('dark');
+  btnDark.textContent = document.body.classList.contains('dark') ? '🌖 Light' : '🌗 Dark';
+});
+
+/* =================== FUNKSIYALAR =================== */
+function setMode(mode){
+  if(mode==='letters'){
+    catSel.style.display='none'; catLabel.style.display='none';
+    currentCards = LETTERS.map(x=>({type:'letter', ...x}));
+  }else{
+    catSel.style.display='inline-block'; catLabel.style.display='inline-block';
+    // tanlangan to‘plamni yuklaymiz
+    const cat = catSel.value || Object.keys(WORD_SETS)[0];
+    currentCards = WORD_SETS[cat].map(x=>({type:'word', ...x}));
+  }
+  order = [...Array(currentCards.length).keys()];
+  render(true);
+}
+function initWordsUI(){
+  // kategoriya select ni to‘ldirish
+  catSel.innerHTML = '';
+  Object.keys(WORD_SETS).forEach(k=>{
+    const o=document.createElement('option'); o.value=k; o.textContent=k; catSel.appendChild(o);
+  });
+}
+function render(resetOverlay=true){
+  if(resetOverlay) closeLarge();
+  grid.innerHTML='';
+  order.forEach((idx)=>{
+    const d = currentCards[idx];
     const card=el('div','card');
-    const btn=el('button','card-btn'); btn.type='button'; btn.setAttribute('aria-label',`Harf ${d.char}, ${d.uz}`);
+    const btn=el('button','card-btn'); btn.type='button'; btn.setAttribute('aria-label', ariaLabel(d));
     const inner=el('div','inner');
 
     const front=el('div','face front');
-    const letter=el('div','letter'); letter.textContent=d.char;
-    front.appendChild(letter);
+    const txt=el('div', d.type==='letter' ? 'letter' : 'word');
+    txt.textContent = d.type==='letter' ? d.char : d.ar;
+    front.appendChild(txt);
 
     const back=el('div','face back');
     const info=el('div','info');
-    const big=el('p','big'); big.textContent=d.ar;
-    const name=el('p','name'); name.textContent=d.uz;
+    const big=el('p','big'); big.textContent = d.type==='letter' ? d.ar : d.ar;
+    const name=el('p','name'); name.textContent= d.type==='letter' ? d.uz : d.uz;
+    if(d.type==='word'){
+      const badge=el('span','badge'); badge.textContent='So‘z';
+      info.appendChild(badge);
+    }
     info.appendChild(big); info.appendChild(name);
     back.appendChild(info);
 
     inner.appendChild(front); inner.appendChild(back);
-    btn.appendChild(inner); card.appendChild(btn); root.appendChild(card);
+    btn.appendChild(inner); card.appendChild(btn); grid.appendChild(card);
 
-    btn.addEventListener('click', ()=> openLarge(card, i));
+    btn.addEventListener('click', ()=> openLarge(card, order.indexOf(idx)));
   });
 }
+function ariaLabel(d){
+  return d.type==='letter' ? `Harf ${d.char}, ${d.uz}` : `So‘z ${d.ar}, ${d.uz}`;
+}
 
-/* ===== Katta karta ===== */
+/* ---- Katta karta ---- */
 function openLarge(card, i){
   closeLarge();
   currentIndex = i;
@@ -285,17 +403,6 @@ function closeLarge(){
     });
   }
 }
-overlay.addEventListener('click', e=>{ if(e.target===overlay) closeLarge(); });
-ovClose.addEventListener('click', closeLarge);
-window.addEventListener('keydown', e=>{
-  if(e.key==='Escape') closeLarge();
-  if(!overlay.classList.contains('open')) return;
-  if(e.key==='ArrowLeft') prev(); // RTL: Left = oldingi
-  if(e.key==='ArrowRight') next();
-});
-btnPrev.addEventListener('click', prev);
-btnNext.addEventListener('click', next);
-
 function prev(){ jump(-1); }
 function next(){ jump(+1); }
 function jump(delta){
@@ -303,71 +410,61 @@ function jump(delta){
   const slot=slots.get(card);
   if(slot && slot.parent){ slot.parent.insertBefore(card, slot.next||null); slots.delete(card); }
   currentIndex = (currentIndex + delta + order.length) % order.length;
-  const target = root.children[currentIndex];
+  const target = grid.children[currentIndex];
   openLarge(target, currentIndex);
 }
 
-/* ===== Toolbar actions ===== */
-btnShuffle.addEventListener('click', ()=>{ order = shuffle(order); render(); });
-btnReset.addEventListener('click', ()=>{ order = [...Array(DATA.length).keys()]; render(); });
-btnDark.addEventListener('click', ()=>{
-  document.body.classList.toggle('dark');
-  btnDark.textContent = document.body.classList.contains('dark') ? '🌖 Light' : '🌗 Dark';
-});
-
-/* ===== Quiz (Viktorina) ===== */
-btnQuiz.addEventListener('click', startQuiz);
+/* ---- Quiz ---- */
 function startQuiz(){
   closeLarge();
-
   overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
 
-  // UI
   const frag = quizTpl.content.cloneNode(true);
   const wrap = frag.querySelector('.quiz-wrap');
-  wrap.id = 'quiz-wrap';
   overlay.appendChild(wrap);
 
   let score=0, total=0;
-  nextQuestion();
+  nextQ();
 
-  function nextQuestion(){
-    const d = DATA[Math.floor(Math.random()*DATA.length)];
-    const opts = new Set([d.uz]);
-    while(opts.size<4){ opts.add(DATA[Math.floor(Math.random()*DATA.length)].uz); }
+  function pool(){
+    if(modeSel.value==='letters') return LETTERS.map(x=>({q:x.char, a:x.uz}));
+    // words — tanlangan kategoriya
+    const items = currentCards;
+    return items.map(x=>({q:x.ar, a:x.uz}));
+  }
+  function nextQ(){
+    const P = pool();
+    const it = P[Math.floor(Math.random()*P.length)];
+    const opts = new Set([it.a]);
+    while(opts.size<4){ opts.add(P[Math.floor(Math.random()*P.length)].a); }
     const mix = Array.from(opts); shuffle(mix);
 
-    wrap.querySelector('#q-char').textContent = d.char;
+    wrap.querySelector('#q-char').textContent = it.q;
     const box = wrap.querySelector('#q-opts'); box.innerHTML='';
     mix.forEach(name=>{
-      const b=document.createElement('button');
-      b.textContent=name;
+      const b=document.createElement('button'); b.textContent=name;
       b.addEventListener('click', ()=>{
         total++;
-        if(name===d.uz){ score++; b.classList.add('good'); } else { b.classList.add('bad'); }
+        if(name===it.a){ score++; b.classList.add('good'); } else { b.classList.add('bad'); }
         wrap.querySelectorAll('#q-opts button').forEach(x=>x.disabled=true);
         upd();
       });
       box.appendChild(b);
     });
-    wrap.querySelector('#q-next').onclick = ()=>{
-      nextQuestion();
-    };
+    wrap.querySelector('#q-next').onclick = nextQ;
     upd();
   }
   function upd(){ wrap.querySelector('#q-score').textContent = `${score}/${total}`; }
 
-  // Quizni yopish — overlay bosilsa yoki Esc
+  // yopish
   overlay.addEventListener('click', onOv, {once:true});
   window.addEventListener('keydown', onEsc);
   function onOv(e){ if(e.target===overlay){ end(); } else { overlay.addEventListener('click', onOv, {once:true}); } }
   function onEsc(e){ if(e.key==='Escape'){ end(); } }
   function end(){
     overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
-    document.body.style.overflow='';
-    wrap.remove();
-    window.removeEventListener('keydown', onEsc);
+    document.body.style.overflow=''; wrap.remove(); window.removeEventListener('keydown', onEsc);
   }
 }
 </script>
