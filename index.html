@@ -16,18 +16,25 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",
 .topbar h1{margin:0 0 6px; font-size:clamp(18px, 3vw, 28px)}
 .hint{margin:6px 0 0; color:#325c84; font-weight:600}
 
-.toolbar{max-width:1100px;margin:10px auto 0;padding:0 16px;display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
-.left,.right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-select{padding:8px 10px;border-radius:10px;border:1px solid #cfe3ff;background:#fff}
-.btn{background:var(--btn);color:var(--btn-ink);border:none;border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:700;box-shadow:0 6px 16px rgba(10,162,255,.25)}
+/* Toolbar */
+.toolbar{max-width:1100px;margin:10px auto 0;padding:0 16px;display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.left,.right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select{padding:8px 10px;border-radius:12px;border:1px solid #cfe3ff;background:#fff}
+.btn{background:var(--btn);color:var(--btn-ink);border:none;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;box-shadow:0 6px 16px rgba(10,162,255,.25)}
 .btn.secondary{background:#e9f4ff;color:#0a3760;box-shadow:none;border:1px solid #cfe3ff}
 .btn.warn{background:#ffd166;color:#4a2a00;box-shadow:0 6px 16px rgba(255,209,102,.25)}
 .btn:active{transform:translateY(1px)}
 
+/* 🟦 KATTAROQ REJIM/MAVZU SELECTLAR */
+.big-select{font-size:18px;padding:12px 14px;border-radius:14px}
+.label-big{font-size:16px;font-weight:800}
+
+/* Grid RTL */
 .grid{--min:130px;display:grid;gap:18px;padding:18px;margin:0 auto 28px;grid-template-columns:repeat(auto-fill,minmax(var(--min),1fr));max-width:1100px;direction:rtl}
 .card,.card *{direction:ltr}
 .placeholder{height:var(--card-h);border-radius:18px;visibility:hidden}
 
+/* Cards */
 .card{perspective:1000px;height:var(--card-h)}
 .card-btn{position:relative;width:100%;height:100%;border:0;background:transparent;padding:0;cursor:pointer}
 .inner{position:absolute;inset:0;border-radius:18px;background:var(--card);box-shadow:0 12px 32px rgba(0,0,0,.08);transition:transform .5s cubic-bezier(.2,.7,.2,1),box-shadow .2s;transform-style:preserve-3d;border:1px solid #dfe8f5}
@@ -40,8 +47,8 @@ select{padding:8px 10px;border-radius:10px;border:1px solid #cfe3ff;background:#
 .info{text-align:center}
 .info .big{font-family:"Noto Kufi Arabic","Amiri",serif;margin:0 0 6px;direction:rtl;font-size:40px}
 .info .name{margin:2px 0 10px;font-weight:800;color:#274a70;font-size:20px}
-.badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#eef5ff;border:1px dashed #bcd6f7;color:#0a3a66;font-weight:700}
 
+/* rangli front */
 .card:nth-child(6n+1) .front{background:radial-gradient(circle at 30% -10%,#e3f7ff,#e3f7ff 30%,#fff 30%)}
 .card:nth-child(6n+2) .front{background:radial-gradient(circle at 70% -10%,#ffe9f3,#ffe9f3 30%,#fff 30%)}
 .card:nth-child(6n+3) .front{background:radial-gradient(circle at 20% -10%,#fff3d9,#fff3d9 30%,#fff 30%)}
@@ -49,14 +56,14 @@ select{padding:8px 10px;border-radius:10px;border:1px solid #cfe3ff;background:#
 .card:nth-child(6n+5) .front{background:radial-gradient(circle at 30% -10%,#f1e9ff,#f1e9ff 30%,#fff 30%)}
 .card:nth-child(6n+6) .front{background:radial-gradient(circle at 70% -10%,#ffe9e9,#ffe9e9 30%,#fff 30%)}
 
+/* Overlay + nav + TTS bar */
 .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(2,15,31,0);backdrop-filter:blur(0px) scale(1);z-index:50;padding:18px;direction:rtl;opacity:0;pointer-events:none;transition:background .35s ease,backdrop-filter .35s ease,opacity .35s ease}
 .overlay.open{background:rgba(2,15,31,.55);backdrop-filter:blur(3px) scale(1.02);opacity:1;pointer-events:auto}
 .ov-close{position:absolute;left:14px;top:12px;z-index:60;border:none;background:var(--accent);color:#4a2a00;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:24px;font-weight:900;box-shadow:0 8px 22px rgba(0,0,0,.25)}
 .nav{position:absolute;inset-inline:16px;top:50%;transform:translateY(-50%);display:flex;justify-content:space-between;pointer-events:none}
 .nav button{pointer-events:auto;width:44px;height:44px;border-radius:50%;border:none;background:#ffffffcc;color:#0a2b52;font-size:22px;cursor:pointer;box-shadow:0 10px 22px rgba(0,0,0,.2)}
-
-/* TTS tugma paneli */
 .ttsbar{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:60}
+
 .card.is-large{width:min(92vw,460px);height:min(80vh,520px)}
 .card.pop-in{transform:scale(.7) translateY(30px);opacity:0;animation:popIn .45s cubic-bezier(.25,.8,.25,1) forwards}
 .card.pop-out{transform:scale(1) translateY(0);opacity:1;animation:popOut .35s cubic-bezier(.4,0,.2,1) forwards}
@@ -67,6 +74,7 @@ select{padding:8px 10px;border-radius:10px;border:1px solid #cfe3ff;background:#
 .card.is-large .info .big{font-size:clamp(48px,8vw,80px)}
 .card.is-large .info .name{font-size:clamp(22px,3.6vw,32px)}
 
+/* Dark */
 .dark{--bg:#0e1726;--panel:#0b1423;--card:#101a2b;--ink:#dbe8ff;--btn:#3aaefc;--btn-ink:#05233b}
 .dark .topbar{border-bottom-color:#10213a}
 .dark .inner{border-color:#1a2a44;box-shadow:0 8px 24px rgba(0,0,0,.5)}
@@ -83,27 +91,25 @@ select{padding:8px 10px;border-radius:10px;border:1px solid #cfe3ff;background:#
 
   <div class="toolbar">
     <div class="left">
-      <label for="mode">Rejim:</label>
-      <select id="mode">
+      <span class="label-big">Rejim:</span>
+      <select id="mode" class="big-select">
         <option value="letters">Harf</option>
         <option value="words">So‘zlar</option>
       </select>
 
-      <label for="category" id="cat-label" style="display:none;">Mavzu:</label>
-      <select id="category" style="display:none;"></select>
+      <span id="cat-label" class="label-big" style="display:none;">Mavzu:</span>
+      <select id="category" class="big-select" style="display:none;"></select>
     </div>
 
     <div class="right">
-      <label for="voice-gender">Ovoz:</label>
-      <select id="voice-gender" title="Ovoz turi">
-        <option value="auto">Avto</option>
-        <option value="female">Ayol</option>
-        <option value="male">Erkak</option>
+      <span class="label-big">Ovoz:</span>
+      <select id="voice-list" class="big-select" title="Arabcha ovozni tanlang">
+        <option>— yuklanyapti —</option>
       </select>
+      <button id="btn-voices-refresh" class="btn secondary" title="Ovozlarni qayta yuklash">🔁 Ovozlarni yangilash</button>
       <button id="btn-tts" class="btn secondary" title="Ovozni yoqish/o‘chirish">🔊 Yoqilgan</button>
       <button id="btn-shuffle" class="btn">🔀 Aralashtirish</button>
       <button id="btn-reset"   class="btn secondary">↩️ Qaytarish</button>
-      <button id="btn-quiz"    class="btn warn">🧠 Quiz</button>
       <button id="btn-dark"    class="btn secondary">🌗 Dark</button>
     </div>
   </div>
@@ -116,16 +122,14 @@ select{padding:8px 10px;border-radius:10px;border:1px solid #cfe3ff;background:#
   <div id="overlay" class="overlay" aria-hidden="true">
     <button id="ov-close" class="ov-close" aria-label="Yopish">×</button>
     <div class="nav"><button id="prev" aria-label="Oldingi">‹</button><button id="next" aria-label="Keyingi">›</button></div>
-    <!-- TTS panel -->
     <div class="ttsbar">
       <button id="tts-play" class="btn warn" title="Tinglash">🔊 Tinglash</button>
       <button id="tts-stop" class="btn secondary" title="To‘xtatish">⏹️ Stop</button>
     </div>
   </div>
 
-
 <script>
-/* ========== HARFLAR (faqat arabcha nom ko‘rsatiladi) ========== */
+/* ======== Harflar (faqat arabcha nom ko‘rsatiladi) ======== */
 const LETTERS = [
   L("ا","ألف"), L("ب","باء"), L("ت","تاء"), L("ث","ثاء"),
   L("ج","جيم"), L("ح","حاء"), L("خ","خاء"), L("د","دال"),
@@ -137,7 +141,7 @@ const LETTERS = [
 ];
 function L(char, nameAr){ return {char, nameAr}; }
 
-/* ===== So‘zlar to‘plami (namunalar, 50 taga to‘ldiriladi) ===== */
+/* ======== So‘zlar to‘plamlari (namunalar; 50 taga to‘ldiriladi) ======== */
 function W(ar, uz){ return {ar, uz}; }
 const WORD_SETS = {
   "Hayvonlar":[ W("أَسَد","Sher"),W("قِطَّة","Mushuk"),W("كَلْب","It"),W("حِصَان","Ot"),W("نَمِر","Yo‘lbars"),
@@ -177,7 +181,7 @@ function ensureFifty(arr){
   return out.slice(0,50);
 }
 
-/* ========== DOM ========== */
+/* ======== DOM ======== */
 const grid = document.getElementById('grid');
 const overlay = document.getElementById('overlay');
 const ovClose = document.getElementById('ov-close');
@@ -192,38 +196,52 @@ const catLabel= document.getElementById('cat-label');
 
 const btnShuffle = document.getElementById('btn-shuffle');
 const btnReset   = document.getElementById('btn-reset');
-const btnQuiz    = document.getElementById('btn-quiz');
 const btnDark    = document.getElementById('btn-dark');
 
-const voiceGenderSel = document.getElementById('voice-gender');
+const voiceList  = document.getElementById('voice-list');
+const btnVoiceRefresh = document.getElementById('btn-voices-refresh');
 const btnTtsToggle = document.getElementById('btn-tts');
-
-const quizTpl = document.getElementById('quiz-tpl');
 
 let order=[], currentIndex=0, currentCards=[];
 const slots = new WeakMap();
 let animating=false;
 
-/* ========== TTS (Web Speech API) ========== */
+/* ======== TTS (arabcha ovoz ro‘yxati bilan) ======== */
 const TTS = {
-  enabled:true, gender:'auto', voice:null, rate:0.9, pitch:1.0, volume:1,
-  femaleHints:["Mona","Zainab","Zeinab","Laila","Layla","Reem","Hoda","Salma","Aisha","Noura","Amira"],
-  maleHints:["Maged","Tariq","Tarik","Omar","Mehdi","Ali","Ahmed","Hassan","Yousef","Yusuf","Ziad"],
-  pickVoice(){
-    const voices = window.speechSynthesis?.getVoices?.() || [];(
-    const arVoices = voices.filter(v => /^ar(-|$)/i.test(v.lang) || /Arabic/i.test(v.name));
-    if(!arVoices.length){ this.voice=null; return; }
-    if(this.gender==='female'){
-      this.voice = arVoices.find(v=>this.femaleHints.some(h=>v.name.includes(h))) || arVoices[0];
-    }else if(this.gender==='male'){
-      this.voice = arVoices.find(v=>this.maleHints.some(h=>v.name.includes(h))) || arVoices[0];
-    }else{
-      this.voice = arVoices[0];
+  enabled:true, voice:null, rate:0.9, pitch:1.0, volume:1,
+  getVoices(){
+    const all = (window.speechSynthesis?.getVoices?.()||[]);
+    // faqat arabcha ovozlar
+    return all.filter(v=>/^ar(-|$)/i.test(v.lang) || /arabic/i.test(v.name));
+  },
+  populateSelect(){
+    const voices = this.getVoices();
+    voiceList.innerHTML = '';
+    if(!voices.length){
+      const opt=document.createElement('option');
+      opt.textContent = "Arabcha ovoz topilmadi (tizim ovozlari yo‘q)";
+      opt.value = "";
+      voiceList.appendChild(opt);
+      this.voice=null; return;
     }
+    voices.forEach((v,i)=>{
+      const o=document.createElement('option');
+      o.value=String(i);
+      o.textContent = `${v.name} — ${v.lang}`;
+      voiceList.appendChild(o);
+    });
+    // tanlovni saqlash yoki 1-ovozni tanlash
+    voiceList.selectedIndex = Math.max(0, voiceList.selectedIndex);
+    this.voice = voices[voiceList.selectedIndex] || voices[0];
+  },
+  pickFromSelect(){
+    const voices = this.getVoices();
+    const idx = Number(voiceList.value);
+    this.voice = voices[idx] || voices[0] || null;
   },
   speak(text){
     if(!this.enabled || !window.speechSynthesis) return;
-    this.pickVoice();
+    this.pickFromSelect();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = (this.voice?.lang) || 'ar-SA';
     if(this.voice) u.voice = this.voice;
@@ -233,18 +251,17 @@ const TTS = {
   },
   stop(){ if(window.speechSynthesis) window.speechSynthesis.cancel(); }
 };
-// iOS/Safari — ovozlar kech yuklanadi
+// iOS/Safari’da ovozlar kech yuklanadi
 if('speechSynthesis' in window){
-  speechSynthesis.onvoiceschanged = ()=> TTS.pickVoice();
+  speechSynthesis.onvoiceschanged = ()=> TTS.populateSelect();
 }
 
-/* ========== Boshlang‘ich ========== */
-initWordsUI(); setMode('letters');
+/* ======== Boshlash ======== */
+initWordsUI(); setMode('letters'); TTS.populateSelect();
 
-/* ========== UI events ========== */
+/* ======== UI events ======== */
 modeSel.addEventListener('change', ()=> setMode(modeSel.value));
 catSel.addEventListener('change', ()=> render());
-
 btnShuffle.addEventListener('click', ()=>{ order = shuffle(order); render(false); });
 btnReset.addEventListener('click', ()=>{ order = [...Array(currentCards.length).keys()]; render(false); });
 
@@ -259,25 +276,27 @@ window.addEventListener('keydown', e=>{
   if(e.key==='ArrowRight') swapDelta(+1);
 });
 
-btnQuiz.addEventListener('click', startQuiz);
 btnDark.addEventListener('click', ()=>{
   document.body.classList.toggle('dark');
   btnDark.textContent = document.body.classList.contains('dark') ? '🌖 Light' : '🌗 Dark';
 });
 
-voiceGenderSel.addEventListener('change', ()=>{ TTS.gender = voiceGenderSel.value; TTS.pickVoice(); });
 btnTtsToggle.addEventListener('click', ()=>{
   TTS.enabled = !TTS.enabled;
   btnTtsToggle.textContent = TTS.enabled ? '🔊 Yoqilgan' : '🔇 O‘chirilgan';
   if(!TTS.enabled) TTS.stop();
 });
+btnVoiceRefresh.addEventListener('click', ()=> TTS.populateSelect());
+voiceList.addEventListener('change', ()=> TTS.pickFromSelect());
 ttsPlay.addEventListener('click', ()=> speakCurrent());
 ttsStop.addEventListener('click', ()=> TTS.stop());
 
-/* ========== Render va karta boshqaruvlari ========== */
+/* ======== Render va karta boshqaruvlari ======== */
 function initWordsUI(){
   catSel.innerHTML='';
-  Object.keys(WORD_SETS).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=k; catSel.appendChild(o); });
+  Object.keys(WORD_SETS).forEach(k=>{
+    const o=document.createElement('option'); o.value=k; o.textContent=k; catSel.appendChild(o);
+  });
 }
 function setMode(mode){
   closeLarge(true);
@@ -313,12 +332,16 @@ function render(resetOverlay=true){
     info.appendChild(big); if(name.textContent) info.appendChild(name); back.appendChild(info);
 
     inner.appendChild(front); inner.appendChild(back); btn.appendChild(inner); card.appendChild(btn); grid.appendChild(card);
+
     btn.addEventListener('click', ()=> openOrSwap(card, order.indexOf(idx)));
   });
 }
 function getLetterName(ch){ const it=LETTERS.find(x=>x.char===ch); return it?it.nameAr:ch; }
 
-/* Placeholder util */
+/* ======== Placeholder ======== */
+function el(t,c){const n=document.createElement(t); if(c) n.className=c; return n;}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
 function createPlaceholder(fromCard){
   const ph=el('div','placeholder'); const h=fromCard.getBoundingClientRect().height||parseFloat(getComputedStyle(fromCard).height);
   ph.style.height=(h||parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-h')))+'px'; return ph;
@@ -333,14 +356,14 @@ function restoreCardFromPlaceholder(card){
   slots.delete(card);
 }
 
-/* Open/Swap/Close */
+/* ======== Open/Swap/Close ======== */
 function openOrSwap(card,i){ if(animating) return; overlay.classList.contains('open') ? swapTo(i,card) : openLarge(card,i); }
 function openLarge(card,i){
   if(animating) return; currentIndex=i; parkCardWithPlaceholder(card);
   overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
   card.classList.add('is-open','is-large','pop-in'); overlay.appendChild(card);
   document.body.style.overflow='hidden';
-  speakCurrent(); // foydalanuvchi bosganida — ruxsat bor, shu zahoti o‘qib beradi
+  speakCurrent();
 }
 function closeLarge(immediate=false){
   if(!overlay.classList.contains('open')) return; const card=overlay.querySelector('.card'); if(!card){ overlay.classList.remove('open'); return; }
@@ -370,17 +393,13 @@ function swapTo(newIndex,newCard){
   }else{ openLarge(newCard,newIndex); animating=false; }
 }
 
-/* TTS helper: hozirgi kartaning arabcha matnini o‘qish */
+/* ======== TTS helper ======== */
 function speakCurrent(){
   if(!TTS.enabled) return;
   const item = currentCards[currentIndex]; if(!item) return;
   const text = (item.type==='letter') ? getLetterName(item.char) : item.ar;
   TTS.speak(text);
 }
-
-/* helpers */
-function el(t,c){const n=document.createElement(t); if(c) n.className=c; return n;}
-function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 </script>
 </body>
 </html>
