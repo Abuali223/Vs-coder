@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Arab Alifbosi — Kartochkalar (TTS, Ota-ona nazorati, O‘yin, Sevimlilar)</title>
+<title>Arab Alifbosi — TTS, Ota-ona nazorati, O‘yinlar, Streak</title>
 <style>
 :root{
   --bg:#f4f8ff; --panel:#eaf2ff; --card:#ffffff; --ink:#16324a;
   --accent:#ffd166; --btn:#0aa2ff; --btn-ink:#fff; --card-h:180px;
-  --ok:#26c281; --bad:#ff6b6b;
+  --ok:#26c281; --bad:#ff6b6b; --muted:#5d7a99;
 }
 *{box-sizing:border-box} html,body{height:100%}
 body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Kufi Arabic",Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -27,9 +27,11 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",
 .big-select{font-size:18px;padding:12px 14px;border-radius:14px}
 .label-big{font-size:16px;font-weight:800}
 .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#eef6ff;border:1px solid #cfe3ff;font-weight:800}
-.badge .star{color:#f0b429}
 .range{display:flex;align-items:center;gap:8px}
 .range input[type=range]{width:160px}
+.kpi{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.kpi .pill{border:1px solid #cfe3ff;background:#f6fbff;border-radius:999px;padding:6px 10px;font-weight:800}
+.kpi .pill .ok{color:var(--ok)} .kpi .pill .muted{color:var(--muted)}
 
 /* Grid (RTL) */
 .grid{--min:130px;display:grid;gap:18px;padding:18px;margin:0 auto 28px;grid-template-columns:repeat(auto-fill,minmax(var(--min),1fr));max-width:1200px;direction:rtl}
@@ -76,11 +78,25 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-/* Score bar */
-.scorebox{display:flex;align-items:center;gap:10px}
-.score{font-weight:900}
-.stars{display:flex;gap:2px}
-.stars i{color:#f0b429}
+/* Score & streak */
+.kpi .pill .star{color:#f0b429}
+.streak{display:flex;align-items:center;gap:6px}
+.progress{position:relative; width:160px; height:10px; background:#e8f1ff; border-radius:999px; overflow:hidden}
+.progress > i{position:absolute;left:0;top:0;bottom:0;background:#0aa2ff;border-radius:999px}
+
+/* Stats modal */
+.stats{background:var(--card);border-radius:16px;padding:18px;max-width:640px;width:min(92vw,640px);box-shadow:0 18px 40px rgba(0,0,0,.25);border:1px solid #dfe8f5}
+.stats h3{margin:0 0 10px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.tile{border:1px solid #e4edff;border-radius:12px;padding:10px;background:#fbfdff}
+.chart{display:flex;gap:6px;align-items:flex-end;height:100px}
+.chart div{flex:1;background:#b9d9ff;border-radius:6px 6px 0 0;position:relative}
+.chart div i{position:absolute;bottom:100%;left:50%;transform:translate(-50%,-4px);font-size:12px;color:#345}
+.chart div small{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:11px;color:#567}
+
+/* Game state hints */
+.target{outline:3px dashed #0a8dff; outline-offset:4px; animation:pulse 1s infinite}
+.wrong{animation:shake .3s}
 
 /* Dark */
 .dark{--bg:#0e1726;--panel:#0b1423;--card:#101a2b;--ink:#dbe8ff;--btn:#3aaefc;--btn-ink:#05233b}
@@ -89,10 +105,6 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",
 .dark .front{background:radial-gradient(circle at 30% -10%,#152338,#152338 30%,#0f1b2d 30%)}
 .dark .ov-close{background:#ffc95b}
 .dark .btn.secondary{background:#0f2139;color:#dbe8ff;border-color:#1d3b63}
-
-/* Game state hints */
-.target{outline:3px dashed #0a8dff; outline-offset:4px; animation:pulse 1s infinite}
-.wrong{animation:shake .3s}
 </style>
 </head>
 <body>
@@ -116,6 +128,15 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",
     </div>
 
     <div class="right" id="controls">
+      <div class="kpi">
+        <div class="pill"><span class="muted">🎯 Maqsad:</span> <b id="goal">30</b>/kun</div>
+        <div class="pill"><span class="muted">📈 Bugun:</span> <b id="todayCount">0</b></div>
+        <div class="pill streak"><span class="muted">🔥 Streak:</span> <b id="streak">0</b></div>
+        <div class="progress" title="Kunlik maqsad">
+          <i id="goalBar" style="width:0%"></i>
+        </div>
+      </div>
+
       <span class="label-big">Ovoz tezligi:</span>
       <div class="range">
         <span>0.5×</span>
@@ -124,7 +145,8 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",
       </div>
 
       <button id="btn-tts" class="btn secondary" title="Ovozni yoqish/o‘chirish">🔊 Yoqilgan</button>
-      <button id="btn-game" class="btn warn" title="Harfni top o‘yini">🎯 O‘yin</button>
+      <button id="btn-game" class="btn warn" title="Harfni top o‘yini">🎯 Harf o‘yini</button>
+      <button id="btn-picgame" class="btn warn" title="So‘z → rasm o‘yini">🖼️ So‘z-rasm</button>
       <button id="btn-shuffle" class="btn">🔀 Aralashtirish</button>
       <button id="btn-reset"   class="btn secondary">↩️ Qaytarish</button>
       <button id="btn-dark"    class="btn secondary">🌗 Dark</button>
@@ -137,6 +159,7 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",
 
     <div class="right">
       <button id="btn-parent" class="btn" title="Ota‑ona nazorati">🔒 Bolalar rejimi</button>
+      <button id="btn-stats" class="btn secondary" title="Statistika (ota‑ona)">📊 Stat</button>
     </div>
   </div>
 
@@ -151,6 +174,7 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",
 
     <div class="ov-actions">
       <button id="btn-fav" class="btn secondary" title="Sevimlilarga qo‘shish">❤️ Sevimli</button>
+      <button id="btn-speakback" class="btn secondary" title="Eshit va takrorla">🎤 Takrorla</button>
     </div>
 
     <div class="ttsbar">
@@ -160,8 +184,7 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",
   </div>
 
 <script>
-/* =================== MA'LUMOTLAR =================== */
-/* Harflar (faqat arabcha nom ko‘rsatiladi) */
+/* =================== Ma'lumotlar =================== */
 const LETTERS = [
   L("ا","ألف"), L("ب","باء"), L("ت","تاء"), L("ث","ثاء"),
   L("ج","جيم"), L("ح","حاء"), L("خ","خاء"), L("د","دال"),
@@ -173,7 +196,6 @@ const LETTERS = [
 ];
 function L(char, nameAr){ return {char, nameAr}; }
 
-/* So‘zlar: qisqa namuna (50 taga avtomatik to‘ldiriladi) */
 function W(ar, uz){ return {ar, uz}; }
 const WORD_SETS = {
   "Hayvonlar":[ W("أَسَد","Sher"),W("قِطَّة","Mushuk"),W("كَلْب","It"),W("حِصَان","Ot"),W("نَمِر","Yo‘lbars"),
@@ -213,7 +235,17 @@ function ensureFifty(arr){
   return out.slice(0,50);
 }
 
-/* =================== DOM elementlar =================== */
+/* Emoji piktogrammalar (So‘z→Rasm o‘yini) — minimal xarita */
+const EMOJI = {
+  "أَسَد":"🦁","قِطَّة":"🐱","كَلْب":"🐶","حِصَان":"🐴","نَمِر":"🐯","فِيل":"🐘","زَرَافَة":"🦒","قِرْد":"🐵","ثَعْلَب":"🦊","ذِئْب":"🐺","دُبّ":"🐻","جَمَل":"🐫","بَقَرَة":"🐮","خَرُوف":"🐑","سُلْحُفاة":"🐢","سَمَك":"🐟","دُولْفِين":"🐬","حُوت":"🐋","قِرْش":"🦈",
+  "تُفَّاح":"🍎","مَوْز":"🍌","عِنَب":"🍇","بُرْتُقَال":"🍊","لَيْمُون":"🍋","خُوخ":"🍑","مِشْمِش":"🍑","كَرَز":"🍒","رُمَّان":"🫚","فِرَاوِلَة":"🍓",
+  "شَمْس":"☀️","قَمَر":"🌙","نَجْمَة":"⭐","سَحَاب":"☁️","مَطَر":"🌧️","ثَلْج":"❄️","رِيح":"🌬️","بَحْر":"🌊","نَهْر":"🏞️","غَابَة":"🌲",
+  "سَيَّارَة":"🚗","دَرَّاجَة":"🚲","حَافِلَة":"🚌","قِطَار":"🚆","طَائِرَة":"✈️","قَارِب":"🛶","سَفِينَة":"🛳️","مِتْرُو":"🚇","تَكْسِي":"🚕","شَاحِنَة":"🚚",
+  "خُبْز":"🍞","مَاء":"💧","حَلِيب":"🥛","أَرُزّ":"🍚","لَحْم":"🥩","دَجَاج":"🍗","سَمَك":"🐟","حَسَاء":"🥣","جُبْن":"🧀","شَاي":"🍵"
+};
+function emojiFor(ar){ return EMOJI[ar] || "❓"; }
+
+/* =================== DOM =================== */
 const grid = document.getElementById('grid');
 const overlay = document.getElementById('overlay');
 const ovClose = document.getElementById('ov-close');
@@ -222,6 +254,7 @@ const btnNext = document.getElementById('next');
 const ttsPlay = document.getElementById('tts-play');
 const ttsStop = document.getElementById('tts-stop');
 const btnFav = document.getElementById('btn-fav');
+const btnSpeakBack = document.getElementById('btn-speakback');
 
 const modeSel = document.getElementById('mode');
 const catSel  = document.getElementById('category');
@@ -230,7 +263,9 @@ const catLabel= document.getElementById('cat-label');
 const btnShuffle = document.getElementById('btn-shuffle');
 const btnReset   = document.getElementById('btn-reset');
 const btnDark    = document.getElementById('btn-dark');
+
 const btnGame    = document.getElementById('btn-game');
+const btnPicGame = document.getElementById('btn-picgame');
 
 const btnTtsToggle = document.getElementById('btn-tts');
 const rateInput = document.getElementById('rate');
@@ -240,18 +275,35 @@ const scoreEl = document.getElementById('score');
 const starsEl = document.getElementById('stars');
 
 const btnParent = document.getElementById('btn-parent');
+const btnStats  = document.getElementById('btn-stats');
 const controls  = document.getElementById('controls');
 
 const btnFavsToggle = document.getElementById('btn-favs-toggle');
 
+const goalEl = document.getElementById('goal');
+const todayCountEl = document.getElementById('todayCount');
+const streakEl = document.getElementById('streak');
+const goalBar = document.getElementById('goalBar');
+
+/* =================== Holat =================== */
 let order=[], currentIndex=0, currentCards=[];
 const slots = new WeakMap();
 let animating=false;
-let kidMode = false;             // ota-ona nazorati (true => bolalar rejimi)
-let favOnly = false;             // sevimlilarni ko‘rsatish
+let kidMode = false;
+let favOnly = false;
+
 let score = +(localStorage.getItem('score')||0);
 let favLetters = new Set(JSON.parse(localStorage.getItem('favLetters')||'[]'));
 let favWords   = new Set(JSON.parse(localStorage.getItem('favWords')||'[]'));
+
+const SETTINGS = {
+  goal: +(localStorage.getItem('goal')||30),
+  todayDate: (localStorage.getItem('todayDate')||null),
+  todayCount: +(localStorage.getItem('todayCount')||0),
+  streak: +(localStorage.getItem('streak')||0),
+  totalSeconds: +(localStorage.getItem('totalSeconds')||0),
+};
+let sessionStart = Date.now();
 
 /* =================== TTS (faqat erkak ovoz) =================== */
 const TTS = {
@@ -264,11 +316,9 @@ const TTS = {
   pickMale(){
     const vs = this.getVoices();
     if(!vs.length){ this.voice=null; return; }
-    // Avval erkak ismli ovozlarni qidiramiz
-    this.voice = vs.find(v => this.maleHints.some(h=>v.name.toLowerCase().includes(h.toLowerCase()))) 
+    this.voice = vs.find(v => this.maleHints.some(h=>v.name.toLowerCase().includes(h.toLowerCase())))
               || vs.find(v => /male|man|guy/i.test(v.name))
-              || vs[0]; // fallback (agar tizimda faqat bitta arabcha ovoz bo‘lsa)
-    // Ehtiyot chora: “faqat erkak” talabi uchun pitch biroz pastroq
+              || vs[0];
     this.pitch = 0.95;
   },
   speak(text){
@@ -287,8 +337,19 @@ if('speechSynthesis' in window){
   speechSynthesis.onvoiceschanged = ()=> TTS.pickMale();
 }
 
+/* =================== Speech Recognition (takrorlash) =================== */
+const SR = (()=> {
+  const SRClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SRClass) return null;
+  const r = new SRClass();
+  r.lang = 'ar-SA';
+  r.interimResults = false;
+  r.maxAlternatives = 3;
+  return r;
+})();
+
 /* =================== Boshlash =================== */
-initWordsUI(); setMode('letters'); updateScore(0);
+initWordsUI(); setMode('letters'); updateScore(0); initGoal(); tickTimer();
 
 /* =================== UI Events =================== */
 modeSel.addEventListener('change', ()=> setMode(modeSel.value));
@@ -321,6 +382,7 @@ rateInput.addEventListener('input', ()=>{
 });
 
 btnParent.addEventListener('click', toggleParentMode);
+btnStats.addEventListener('click', showStats);
 
 btnFav.addEventListener('click', toggleFavorite);
 btnFavsToggle.addEventListener('click', ()=>{
@@ -328,8 +390,10 @@ btnFavsToggle.addEventListener('click', ()=>{
   btnFavsToggle.classList.toggle('warn', favOnly);
   render();
 });
+btnSpeakBack.addEventListener('click', doSpeakBack);
 
-btnGame.addEventListener('click', toggleGame);
+btnGame.addEventListener('click', toggleGameLetters);
+btnPicGame.addEventListener('click', toggleGamePics);
 
 /* =================== Render va karta boshqaruvlari =================== */
 function initWordsUI(){
@@ -356,7 +420,6 @@ function render(resetOverlay=true){
   grid.innerHTML='';
   let list = order.map(i=>currentCards[i]);
 
-  // Sevimlilar filtri
   if(favOnly){
     list = list.filter(item=>{
       if(item.type==='letter') return favLetters.has('L:'+item.char);
@@ -371,7 +434,7 @@ function render(resetOverlay=true){
     }
   }
 
-  list.forEach((d,visualIdx)=>{
+  list.forEach((d)=>{
     const card=el('div','card');
     const btn=el('button','card-btn'); btn.type='button';
     btn.setAttribute('aria-label', d.type==='letter' ? `Harf ${d.char}` : `So‘z ${d.ar}`);
@@ -392,13 +455,10 @@ function render(resetOverlay=true){
     inner.appendChild(front); inner.appendChild(back);
     btn.appendChild(inner); card.appendChild(btn); grid.appendChild(card);
 
-    // indexini aniqlash (favOnly bo‘lsa ham to‘g‘ri topish uchun)
     const absoluteIndex = currentCards.findIndex(x => (x.type===d.type) && ((x.type==='letter' && x.char===d.char) || (x.type==='word' && x.ar===d.ar)));
-
     btn.addEventListener('click', ()=> openOrSwap(card, absoluteIndex));
   });
 }
-function ariaLabel(d){ return d.type==='letter' ? `Harf ${d.char}` : `So‘z ${d.ar}`; }
 function getLetterName(ch){ const it=LETTERS.find(x=>x.char===ch); return it?it.nameAr:ch; }
 
 function el(t,c){const n=document.createElement(t); if(c) n.className=c; return n;}
@@ -419,7 +479,7 @@ function restoreCardFromPlaceholder(card){
   slots.delete(card);
 }
 
-/* ---- Overlay open/swap/close + scoring + favorites ---- */
+/* ---- Overlay open/swap/close + scoring + favorites + goal ---- */
 function openOrSwap(card,i){
   if(animating) return;
   if(overlay.classList.contains('open')) swapTo(i, card);
@@ -433,8 +493,9 @@ function openLarge(card,i){
   document.body.style.overflow='hidden';
   speakCurrent();
 
-  // Ball: karta ochilganda 1 qo‘shamiz
+  // Ball & goal
   updateScore(1);
+  incToday();
 
   // Fav holatini yangilash
   updateFavBtn();
@@ -456,7 +517,6 @@ function closeLarge(immediate=false){
 function swapDelta(delta){
   if(!overlay.classList.contains('open')) return;
   const nextIndex=(currentIndex+delta+order.length)%order.length;
-  // topamiz: griddagi mos kartani
   const targetData = currentCards[nextIndex];
   const target = [...grid.querySelectorAll('.card')].find(c=>{
     const t = extractCardDataFromEl(c);
@@ -501,7 +561,7 @@ function updateScore(inc){
   localStorage.setItem('score', String(score));
   scoreEl.textContent = score;
   const stars = Math.floor(score/10);
-  starsEl.innerHTML = ' '.repeat(stars).split('').map(()=>'<i>★</i>').join('');
+  starsEl.innerHTML = Array.from({length:stars},()=>'<span class="star">★</span>').join('');
 }
 
 /* ---- Favorites ---- */
@@ -527,64 +587,203 @@ function toggleFavorite(){
 /* ---- Ota-ona nazorati ---- */
 function toggleParentMode(){
   if(!kidMode){
-    // Yoqish (qulf) => parol so‘ramaydi, darhol bolalar rejimi
     kidMode = true;
     applyKidMode();
     btnParent.textContent = '🔓 Ota‑ona rejimi';
   }else{
-    // Ota-ona rejimini ochish uchun parol (1234)
     const p = prompt("Ota‑ona paroli (1234):","");
     if(p==='1234'){ kidMode=false; applyKidMode(); btnParent.textContent='🔒 Bolalar rejimi'; }
     else { alert("Parol noto‘g‘ri."); }
   }
 }
 function applyKidMode(){
-  // Bolalar rejimi: faqat kartalar; sozlamalarni yashiramiz
   controls.style.display = kidMode ? 'none' : 'flex';
-  // Rejim/Mavzu ko‘rinsin, lekin o‘yin tugmasini ham yashiramiz
   btnGame.style.display = kidMode ? 'none' : 'inline-flex';
+  btnPicGame.style.display = kidMode ? 'none' : 'inline-flex';
 }
 
-/* ---- Mini-o‘yin: Harfni top ---- */
-let gameOn=false, targetIndex=null;
-function toggleGame(){
-  if(modeSel.value!=='letters'){ alert("O‘yin faqat Harf rejimida ishlaydi."); return; }
-  gameOn = !gameOn;
-  btnGame.textContent = gameOn ? "🛑 O‘yinni to‘xtat" : "🎯 O‘yin";
-  clearTargets();
-  if(gameOn){ nextTarget(); }
+/* ---- Kunlik maqsad & streak ---- */
+function todayStr(){ const d=new Date(); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function initGoal(){
+  goalEl.textContent = SETTINGS.goal;
+  if(SETTINGS.todayDate !== todayStr()){ // yangi kun
+    rollDay();
+  }
+  updateGoalUI();
 }
-function nextTarget(){
+function rollDay(){
+  // streak hisoblash (kecha maqsad bajarilgan bo‘lsa va ketma-ket bo‘lsa)
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+  const ystr = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+  if(SETTINGS.todayDate===ystr && SETTINGS.todayCount>=SETTINGS.goal){ SETTINGS.streak = (SETTINGS.streak||0)+1; }
+  else if(SETTINGS.todayDate) { SETTINGS.streak = 0; }
+
+  SETTINGS.todayDate = todayStr();
+  SETTINGS.todayCount = 0;
+  persistGoal();
+}
+function incToday(){
+  if(SETTINGS.todayDate !== todayStr()) rollDay();
+  SETTINGS.todayCount++;
+  persistGoal();
+  updateGoalUI();
+}
+function updateGoalUI(){
+  todayCountEl.textContent = SETTINGS.todayCount;
+  streakEl.textContent = SETTINGS.streak;
+  const pct = Math.min(100, Math.round(SETTINGS.todayCount/SETTINGS.goal*100));
+  goalBar.style.width = pct + '%';
+  if(SETTINGS.todayCount>=SETTINGS.goal && !document.getElementById('goalCongrats')){
+    const s=document.createElement('div'); s.id='goalCongrats'; s.className='badge'; s.style.position='fixed'; s.style.right='12px'; s.style.bottom='12px';
+    s.textContent='🎉 Kunlik maqsad bajarildi!'; document.body.appendChild(s); setTimeout(()=>s.remove(), 3000);
+  }
+}
+function persistGoal(){
+  localStorage.setItem('todayDate', SETTINGS.todayDate);
+  localStorage.setItem('todayCount', SETTINGS.todayCount);
+  localStorage.setItem('streak', SETTINGS.streak);
+}
+
+/* ---- Statistika modal ---- */
+function showStats(){
+  const ov=document.createElement('div'); ov.className='overlay open'; ov.style.zIndex=100;
+  ov.innerHTML = `
+    <div class="stats">
+      <h3>📊 Statistika</h3>
+      <div class="stat-grid">
+        <div class="tile"><b>Umumiy ball:</b><div>${score}</div></div>
+        <div class="tile"><b>Yulduzlar:</b><div>${Math.floor(score/10)}</div></div>
+        <div class="tile"><b>Streak:</b><div>${SETTINGS.streak}</div></div>
+        <div class="tile"><b>Bugungi karta:</b><div>${SETTINGS.todayCount}/${SETTINGS.goal}</div></div>
+        <div class="tile"><b>Sevimli harflar:</b><div>${favLetters.size}</div></div>
+        <div class="tile"><b>Sevimli so‘zlar:</b><div>${favWords.size}</div></div>
+        <div class="tile" style="grid-column:1/-1">
+          <b>Oxirgi 7 kun:</b>
+          <div class="chart" id="chart7"></div>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;justify-content:flex-end">
+        <button id="st-close" class="btn">Yopish</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  // chart ma'lumot (saqlash: dayCounts: {YYYY-MM-DD: count})
+  const map = JSON.parse(localStorage.getItem('dayCounts')||'{}');
+  // yangilab qo‘yamiz bugungi kunni
+  map[todayStr()] = SETTINGS.todayCount;
+  localStorage.setItem('dayCounts', JSON.stringify(map));
+
+  const elChart = ov.querySelector('#chart7');
+  const days = [...Array(7)].map((_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(6-i)); const s=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; return s; });
+  const max = Math.max(SETTINGS.goal, ...days.map(d=>map[d]||0), 1);
+  days.forEach(d=>{
+    const v = map[d]||0;
+    const bar=document.createElement('div'); bar.style.height = (v/max*100)+'%';
+    bar.innerHTML = `<i>${v}</i><small>${d.slice(5)}</small>`;
+    elChart.appendChild(bar);
+  });
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.remove(); });
+  ov.querySelector('#st-close').onclick=()=>ov.remove();
+}
+
+/* ---- Mini‑o‘yin 1: Harfni top ---- */
+let gameLettersOn=false, targetIndex=null;
+function toggleGameLetters(){
+  if(modeSel.value!=='letters'){ alert("O‘yin faqat Harf rejimida ishlaydi."); return; }
+  gameLettersOn = !gameLettersOn;
+  btnGame.textContent = gameLettersOn ? "🛑 Harf o‘yinini to‘xtat" : "🎯 Harf o‘yini";
+  clearTargets();
+  if(gameLettersOn){ nextTargetLetter(); }
+}
+function nextTargetLetter(){
   clearTargets();
   targetIndex = Math.floor(Math.random()*currentCards.length);
   const targetData = currentCards[targetIndex];
-  // griddagi mos element
   const elCard = [...grid.querySelectorAll('.card')].find(c=>{
     const d = extractCardDataFromEl(c);
     return d && d.type==='letter' && d.char===targetData.char;
   });
   if(elCard){ elCard.classList.add('target'); }
-  // ovozda aytamiz
   speakText(getLetterName(targetData.char));
 }
 function clearTargets(){ grid.querySelectorAll('.card.target').forEach(c=>c.classList.remove('target')); }
 function speakText(t){ if(!TTS.enabled) return; TTS.speak(t); }
-
-// O‘yin uchun grid bosish hook’i
 grid.addEventListener('click', (e)=>{
-  if(!gameOn) return;
+  if(!gameLettersOn) return;
   const cardEl = e.target.closest('.card'); if(!cardEl) return;
   const data = extractCardDataFromEl(cardEl); if(!data || data.type!=='letter') return;
   const isCorrect = (currentCards[targetIndex]?.char === data.char);
   if(isCorrect){
-    updateScore(1);
-    burst(cardEl);
-    setTimeout(nextTarget, 500);
-  }else{
-    cardEl.classList.add('wrong');
-    setTimeout(()=>cardEl.classList.remove('wrong'), 300);
-  }
+    updateScore(1); incToday(); burst(cardEl); setTimeout(nextTargetLetter, 500);
+  }else{ cardEl.classList.add('wrong'); setTimeout(()=>cardEl.classList.remove('wrong'), 300); }
 });
+
+/* ---- Mini‑o‘yin 2: So‘z → rasm (emoji) ---- */
+let gamePicsOn=false;
+function toggleGamePics(){
+  if(modeSel.value!=='words'){ alert("Bu o‘yin So‘zlar rejimida ishlaydi."); return; }
+  gamePicsOn = !gamePicsOn;
+  btnPicGame.textContent = gamePicsOn ? "🛑 So‘z-rasmni to‘xtat" : "🖼️ So‘z-rasm";
+  if(gamePicsOn){ startPicRound(); }
+}
+function startPicRound(){
+  if(!gamePicsOn) return;
+  const pool = ensureFifty(WORD_SETS[catSel.value || Object.keys(WORD_SETS)[0]]);
+  const correct = pool[Math.floor(Math.random()*pool.length)];
+  const opts = new Set([correct]);
+  while(opts.size<4){ opts.add(pool[Math.floor(Math.random()*pool.length)]); }
+  const options = [...opts].sort(()=>Math.random()-0.5);
+
+  const ov=document.createElement('div'); ov.className='overlay open'; ov.style.zIndex=90;
+  const htmlOpts = options.map((o,i)=>`<button data-i="${i}" class="btn" style="font-size:38px">${emojiFor(o.ar)}</button>`).join('');
+  ov.innerHTML = `
+    <div class="stats">
+      <h3 style="text-align:center;margin-top:0">🖼️ Qaysi rasm? <div style="font-family:'Noto Kufi Arabic','Amiri',serif;direction:rtl;font-size:40px">${correct.ar}</div></h3>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;justify-items:center">${htmlOpts}</div>
+      <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+        <button id="p-listen" class="btn warn">🔊 Eshtirish</button>
+        <button id="p-close" class="btn secondary">Yopish</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e=>{ if(e.target===ov){ ov.remove(); gamePicsOn=false; btnPicGame.textContent="🖼️ So‘z-rasm"; } });
+
+  ov.querySelectorAll('button[data-i]').forEach((b,idx)=>{
+    b.onclick=()=>{
+      const choice = options[idx];
+      if(choice.ar===correct.ar){ b.style.background= "#d9f9d9"; updateScore(1); incToday(); setTimeout(()=>{ ov.remove(); startPicRound(); }, 400); }
+      else { b.style.background="#ffd6d6"; }
+    };
+  });
+  ov.querySelector('#p-close').onclick=()=>{ ov.remove(); gamePicsOn=false; btnPicGame.textContent="🖼️ So‘z-rasm"; };
+  ov.querySelector('#p-listen').onclick=()=> speakText(correct.ar);
+}
+
+/* ---- Takrorlash (Speech Recognition) ---- */
+function normalizeArabic(s){
+  return (s||'')
+    .replace(/[\u064B-\u0652]/g,'') // diakritiklarni olib tashla
+    .replace(/ٱ/g,'ا')
+    .replace(/ى/g,'ي')
+    .replace(/ة/g,'ه')
+    .replace(/\s+/g,'')
+    .trim();
+}
+function doSpeakBack(){
+  if(!SR){ alert("Brauzer nutqni tanishni qo‘llab-quvvatlamaydi."); return; }
+  const item = currentCards[currentIndex]; if(!item) return;
+  const target = (item.type==='letter') ? getLetterName(item.char) : item.ar;
+  TTS.speak("أَعِدْ مِنْ فَضْلِكَ"); // “Iltimos, takrorlang”
+  try{
+    SR.onresult = (e)=>{
+      let best = ''; for(const res of e.results){ best = res[0].transcript; break; }
+      const good = normalizeArabic(best) === normalizeArabic(target);
+      alert(good ? "✅ Aʼlo! Juda o‘xshash aytdingiz." : ("❌ Qayta urinib ko‘ring.\nSiz: "+best));
+    };
+    SR.onerror = ()=> alert("❌ Tinglashda xatolik. Qayta urinib ko‘ring.");
+    SR.start();
+  }catch(err){ alert("❌ Mikrofon ruxsati kerak bo‘lishi mumkin."); }
+}
 
 /* ---- Kichik konfet (yulduz) effekti ---- */
 function burst(anchor){
@@ -597,12 +796,18 @@ function burst(anchor){
     s.style.pointerEvents='none'; s.style.transition='transform .8s ease, opacity .8s ease';
     document.body.appendChild(s);
     const dx=(Math.random()-0.5)*160, dy=(Math.random()-0.5)*160;
-    requestAnimationFrame(()=>{
-      s.style.transform=`translate(${dx}px, ${dy}px) scale(1.2)`;
-      s.style.opacity='0';
-    });
+    requestAnimationFrame(()=>{ s.style.transform=`translate(${dx}px, ${dy}px) scale(1.2)`; s.style.opacity='0'; });
     setTimeout(()=>s.remove(), 850);
   }
+}
+
+/* ---- Sessiya va vaqt hisoblagichi ---- */
+function tickTimer(){
+  setInterval(()=> {
+    const now=Date.now(); const delta=Math.floor((now-sessionStart)/1000); sessionStart=now;
+    SETTINGS.totalSeconds += delta;
+    localStorage.setItem('totalSeconds', SETTINGS.totalSeconds);
+  }, 5000);
 }
 
 /* =================== Yordamchi =================== */
